@@ -1,2 +1,4 @@
-# Perception_on_Prolog
-Implementation of a simple perceptron in prolog
+# Perceptron On Prolog
+Implementation of a simple perceptron in Prolog.
+
+
