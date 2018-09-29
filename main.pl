@@ -1,25 +1,32 @@
 % data([],label)
-:- ['./database_par.pl'].
+% :- ['./database_par.pl'].
 % :- ['./database_impar.pl'].
-% :- ['./database_mayor_5.pl'].
-:- dynamic(weight/2).
+:- ['./database_mayor_5.pl'].
+% :- ['./database_xor.pl'].
+:- dynamic(totalEpoch/1). % For epoch info
+:- dynamic(weight/3).
 :- dynamic(error/2).
-weight(w1, []).
-weight(b1, 0).
+
+weight(p1, [], synaptic).
+weight(p1, 0, bias).
 error(e1, 0).
 
-%
+% Retract and Asserta
 updata_err(E, Val) :-
   retract(error(E, _)),
   asserta(error(E, Val)).
-updata_weight(W, Val) :-
-  retract(weight(W, _)),
-  asserta(weight(W, Val)).
+updata_weight(W, Val, bias) :-
+  retract(weight(W, _, bias)),
+  asserta(weight(W, Val, bias)).
+updata_weight(W, Val, synaptic) :-
+  retract(weight(W, _, synaptic)),
+  asserta(weight(W, Val, synaptic)).
 
 % Re-set weight values
 clenaer() :-
-  updata_weight(w1, []),
-  updata_weight(b1, 0),
+  retract(totalEpoch(_)),
+  updata_weight(p1, [], synaptic),
+  updata_weight(p1, 0, bias),
   updata_err(e1, 0).
 
 % Random List
@@ -47,53 +54,69 @@ produc_dot([H1|T1], [H2|T2], Rta) :-
 % https://en.wikipedia.org/wiki/Activation_function
 % Step
 step(X,1) :-
-  X >= 0.
+  X > 0.
 step(_,0). % 0 or -1
 
-perception(X, Rta) :-
-  weight(w1, W),
+% perception
+perception(Name, X, Rta) :-
+  X \= [],
+  weight(Name, W, synaptic),
   W \= [],
-  weight(b1, B1),
   produc_dot(X, W, Mrta),
-  MB1 is Mrta + B1,
-  step(MB1, Rta).
-perception(X, Rta) :-
+  weight(Name, B, bias),
+  MB is Mrta + B,
+  step(MB, Rta).
+perception(Name, X, Rta) :-
+  X \= [],
   length_list(X, LenX),
-  random_list(LenX, W1),
-  updata_weight(w1, W1), % weight
-  random(B1),
-  updata_weight(b1, B1), % weight synaptic
-  perception(X, Rta).
+  random_list(LenX, W),
+  updata_weight(Name, W, synaptic),
+  random(B),
+  updata_weight(Name, B, bias),
+  perception(Name, X, Rta).
 
+% adjust
 adjust_weights(GetW, Err) :-
-  weight(GetW, W),
+  weight(GetW, W, synaptic),
   adjust_weights(W, Err, [], NewW),
-  updata_weight(GetW, NewW),
-  weight(b1, B1),
+  updata_weight(GetW, NewW, synaptic),
+  weight(GetW, B1, bias),
   NewB is B1 + Err,
-  updata_weight(b1, NewB).
+  updata_weight(GetW, NewB, bias).
 
 adjust_weights([], _, Rta, Rta).
 adjust_weights([Hw|Tw], Err, T, Rta) :-
   H is Hw + Err,
   adjust_weights(Tw, Err, [H|T], Rta).
 
+% epoch
+info(Epoch) :-
+  totalEpoch(TotalEpoch),
+  weight(p1, W1, synaptic),
+  error(e1, Error),
+
+  Run is TotalEpoch - Epoch + 1,
+  format('
+  --- Summary  Epoch ~w ---
+  Weights: ~w
+  Error: ~w
+  ', [Run, W1, Error]).
+
+info(Epoch) :-
+  asserta(totalEpoch(Epoch)),
+  info(Epoch).
+
 epoch(0) :-
-  writeln('Epoch summary'),
-  weight(w1, W1),
-  write('Weight: '), writeln(W1),
-  weight(b1, B1),
-  write('Weight synaptic: '), writeln(B1),
-  error(e1, E1),
-  write('Error : '), writeln(E1),
+  info(0),
   clenaer().
 
 epoch(Epoch) :-
   Epoch \= 0,
   data(X, Label),
-  perception(X, Prediction),
-  Err is Label - Prediction,
-  adjust_weights(w1, Err),
+  perception(p1, X, P1),
+  Err is Label - P1,
+  adjust_weights(p1, Err),
   NextEpoch is Epoch - 1,
   updata_err(e1, Err),
+  info(Epoch),
   epoch(NextEpoch).

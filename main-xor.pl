@@ -1,7 +1,9 @@
+% data([],label)
 :- ['./database_xor.pl'].
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/3).
 :- dynamic(error/2).
+
 weight(p1, [], synaptic).
 weight(p2, [], synaptic).
 weight(p3, [], synaptic).
@@ -10,7 +12,7 @@ weight(p2, 0, bias).
 weight(p3, 0, bias).
 error(e1, 0).
 
-%
+% Retract and Asserta
 updata_err(E, Val) :-
   retract(error(E, _)),
   asserta(error(E, Val)).
