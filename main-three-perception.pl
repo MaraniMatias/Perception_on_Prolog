@@ -113,7 +113,7 @@ info(Epoch) :-
 
 info(Epoch) :-
   TotalEpoch is Epoch - 1,
-  asserta(totalEpoch(Epoch)),
+  asserta(totalEpoch(TotalEpoch)),
   info(Epoch).
 
 epoch(1) :-
