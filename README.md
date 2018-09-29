@@ -49,11 +49,11 @@ Para estos problemas necesitamos tres preceptrones
 
 ![Tables and graphs adapted from Kevin Swingler.](https://raw.githubusercontent.com/MaraniMatias/Perceptron_on_Prolog/image/and_or_xor.png)
 
-![Three perceptrons](https://raw.githubusercontent.com/MaraniMatias/Perceptron_on_Prolog/image/three_perceptrons.png)
+![Three perceptrons](https://raw.githubusercontent.com/MaraniMatias/Perceptron_on_Prolog/image/three_perceptrons.jpg)
 
 ### Correr
 
-En el archivo `main-there-perception.pl`
+En el archivo `main-three-perception.pl`
 ```prolog
 ?- epoch(3).
 ```
