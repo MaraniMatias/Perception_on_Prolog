@@ -1,4 +1,4 @@
-% data([],label)
+% data([], label).
 :- ['./database_xor.pl'].
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/3).
@@ -102,7 +102,7 @@ info(Epoch) :-
   weight(p3, W3, synaptic),
   error(e1, Error),
 
-  Run is TotalEpoch - Epoch + 1,
+  Run is TotalEpoch - Epoch + 2,
   format('
   --- Summary  Epoch ~w ---
   Weights of perception 1: ~w
@@ -112,15 +112,16 @@ info(Epoch) :-
   ', [Run, W1, W2, W3, Error]).
 
 info(Epoch) :-
+  TotalEpoch is Epoch - 1,
   asserta(totalEpoch(Epoch)),
   info(Epoch).
 
-epoch(0) :-
-  info(0),
+epoch(1) :-
+  info(1),
   clenaer().
 
 epoch(Epoch) :-
-  Epoch \= 0,
+  Epoch \= 1,
   data(X, Label),
   perception(p1, X, P1),
   perception(p2, X, P2),

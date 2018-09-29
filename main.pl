@@ -1,4 +1,4 @@
-% data([],label)
+% data([], label).
 % :- ['./database_par.pl'].
 % :- ['./database_impar.pl'].
 :- ['./database_mayor_5.pl'].
@@ -95,7 +95,7 @@ info(Epoch) :-
   weight(p1, W1, synaptic),
   error(e1, Error),
 
-  Run is TotalEpoch - Epoch + 1,
+  Run is TotalEpoch - Epoch + 2,
   format('
   --- Summary  Epoch ~w ---
   Weights: ~w
@@ -103,15 +103,16 @@ info(Epoch) :-
   ', [Run, W1, Error]).
 
 info(Epoch) :-
-  asserta(totalEpoch(Epoch)),
+  TotalEpoch is Epoch - 1,
+  asserta(totalEpoch(TotalEpoch)),
   info(Epoch).
 
-epoch(0) :-
-  info(0),
+epoch(1) :-
+  info(1),
   clenaer().
 
 epoch(Epoch) :-
-  Epoch \= 0,
+  Epoch \= 1,
   data(X, Label),
   perception(p1, X, P1),
   Err is Label - P1,
