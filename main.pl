@@ -1,8 +1,8 @@
 % data([], label).
 % :- ['./database_par.pl'].
 % :- ['./database_impar.pl'].
-% :- ['./database_mayor_5.pl'].
-:- ['./database_xor.pl'].
+:- ['./database_mayor_5.pl'].
+% :- ['./database_xor.pl'].
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/3).
 :- dynamic(error/2).
