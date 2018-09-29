@@ -100,16 +100,22 @@ info(Epoch) :-
   weight(p1, W1, synaptic),
   weight(p2, W2, synaptic),
   weight(p3, W3, synaptic),
+  weight(p1, B1, bias),
+  weight(p2, B2, bias),
+  weight(p3, B3, bias),
   error(e1, Error),
 
   Run is TotalEpoch - Epoch + 2,
   format('
   --- Summary  Epoch ~w ---
   Weights of perception 1: ~w
+  Bias: ~w
   Weights of perception 2: ~w
+  Bias: ~w
   Weights of perception 3: ~w
+  Bias: ~w
   Error: ~w
-  ', [Run, W1, W2, W3, Error]).
+  ', [Run, W1, B1, W2, B2, W3, B3, Error]).
 
 info(Epoch) :-
   TotalEpoch is Epoch - 1,

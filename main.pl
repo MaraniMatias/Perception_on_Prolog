@@ -1,8 +1,8 @@
 % data([], label).
 % :- ['./database_par.pl'].
 % :- ['./database_impar.pl'].
-:- ['./database_mayor_5.pl'].
-% :- ['./database_xor.pl'].
+% :- ['./database_mayor_5.pl'].
+:- ['./database_xor.pl'].
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/3).
 :- dynamic(error/2).
@@ -93,14 +93,16 @@ adjust_weights([Hw|Tw], Err, T, Rta) :-
 info(Epoch) :-
   totalEpoch(TotalEpoch),
   weight(p1, W1, synaptic),
+  weight(p1, B1, bias),
   error(e1, Error),
 
   Run is TotalEpoch - Epoch + 2,
   format('
   --- Summary  Epoch ~w ---
   Weights: ~w
+  Bias: ~w
   Error: ~w
-  ', [Run, W1, Error]).
+  ', [Run, W1, B1, Error]).
 
 info(Epoch) :-
   TotalEpoch is Epoch - 1,
