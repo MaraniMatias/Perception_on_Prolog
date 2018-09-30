@@ -6,12 +6,11 @@
 % data([], label).
 openDataSet :-
   retractall(data(_, _)),
-% consult('./database_par_min.pl').
-%  consult('./database_and.pl').
-% consult('./database_par.pl').
-% consult('./database_impar.pl').
-% consult('./database_mayor_5.pl').
-consult('./database_xor.pl').
+%  consult('./database/and.pl').
+% consult('./database/par.pl').
+% consult('./database/impar.pl').
+% consult('./database/mayor_5.pl').
+consult('./database/xor.pl').
 :- openDataSet.
 
 weight(p1, [], synaptic).
