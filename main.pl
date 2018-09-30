@@ -1,24 +1,35 @@
-% data([], label).
-% :- ['./database_par.pl'].
-% :- ['./database_impar.pl'].
-:- ['./database_mayor_5.pl'].
-% :- ['./database_xor.pl'].
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/3).
 :- dynamic(error/2).
+:- dynamic(data/2).
+
+% data([], label).
+openDataSet :-
+  retractall(data(_,_)),
+% writeln('>>>>>>--------------< Open DB >----------------<<<<<<'),
+% consult('./database_par_min.pl').
+  consult('./database_and.pl').
+% consult('./database_par.pl').
+% consult('./database_impar.pl').
+% consult('./database_mayor_5.pl').
+% consult('./database_xor.pl').
+:- openDataSet.
 
 weight(p1, [], synaptic).
 weight(p1, 0, bias).
-error(e1, 0).
+error(e1, inf).
 
 % Retract and Asserta
 updata_err(E, Val) :-
+  % writeln([E,Val]),
   retract(error(E, _)),
   asserta(error(E, Val)).
 updata_weight(W, Val, bias) :-
+  % writeln([b,Val]),
   retract(weight(W, _, bias)),
   asserta(weight(W, Val, bias)).
 updata_weight(W, Val, synaptic) :-
+  % writeln([W,Val]),
   retract(weight(W, _, synaptic)),
   asserta(weight(W, Val, synaptic)).
 
@@ -26,8 +37,8 @@ updata_weight(W, Val, synaptic) :-
 clenaer() :-
   retract(totalEpoch(_)),
   updata_weight(p1, [], synaptic),
-  updata_weight(p1, 0, bias),
-  updata_err(e1, 0).
+  updata_weight(p1, inf, bias),
+  updata_err(e1, inf).
 
 % Random List
 random_list(0, []).
@@ -53,9 +64,9 @@ produc_dot([H1|T1], [H2|T2], Rta) :-
 % Funcion de activacion
 % https://en.wikipedia.org/wiki/Activation_function
 % Step
-step(X,1) :-
+step(X, 1) :-
   X > 0.
-step(_,0). % 0 or -1
+step(_, 0). % 0 or -1
 
 % perception
 perception(Name, X, Rta) :-
@@ -78,16 +89,16 @@ perception(Name, X, Rta) :-
 % adjust
 adjust_weights(GetW, Err) :-
   weight(GetW, W, synaptic),
-  adjust_weights(W, Err, [], NewW),
+  adjust_weights(W, Err, NewW),
   updata_weight(GetW, NewW, synaptic),
   weight(GetW, B1, bias),
   NewB is B1 + Err,
   updata_weight(GetW, NewB, bias).
 
-adjust_weights([], _, Rta, Rta).
-adjust_weights([Hw|Tw], Err, T, Rta) :-
-  H is Hw + Err,
-  adjust_weights(Tw, Err, [H|T], Rta).
+adjust_weights([], _, []).
+adjust_weights([Hw|Tw], Err, [H|T]) :-
+  adjust_weights(Tw, Err, T),
+  H is Hw + Err.
 
 % epoch
 info(Epoch) :-
@@ -96,30 +107,34 @@ info(Epoch) :-
   weight(p1, B1, bias),
   error(e1, Error),
 
-  Run is TotalEpoch - Epoch + 2,
+  Run is TotalEpoch - Epoch + 1,
   format('
-  --- Summary  Epoch ~w ---
+  --- Summary  Epoch ~w --- Error: ~w
   Weights: ~w
   Bias: ~w
-  Error: ~w
-  ', [Run, W1, B1, Error]).
+  ~n', [Run, Error, W1, B1]).
 
 info(Epoch) :-
-  TotalEpoch is Epoch - 1,
+  TotalEpoch is Epoch,
   asserta(totalEpoch(TotalEpoch)),
   info(Epoch).
 
-epoch(1) :-
-  info(1),
+epoch(0) :-
   clenaer().
-
+% loop by data
 epoch(Epoch) :-
-  Epoch \= 1,
+  Epoch \= 0,
   data(X, Label),
+  retractall(data(X, Label)),
   perception(p1, X, P1),
   Err is Label - P1,
   adjust_weights(p1, Err),
-  NextEpoch is Epoch - 1,
-  updata_err(e1, Err),
   info(Epoch),
+  updata_err(e1, Err),
+  epoch(Epoch).
+% loop by Epoch
+epoch(Epoch) :-
+  Epoch \= 0,
+  openDataSet,
+  NextEpoch is Epoch - 1,
   epoch(NextEpoch).
