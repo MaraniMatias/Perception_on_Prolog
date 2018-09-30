@@ -87,13 +87,13 @@ perception(Name, X, Rta) :-
   perception(Name, X, Rta).
 
 % adjust
-adjust_weights(GetW, Err) :-
-  weight(GetW, W, synaptic),
+adjust_weights(Name, Err) :-
+  weight(Name, W, synaptic),
   adjust_weights(W, Err, NewW),
-  updata_weight(GetW, NewW, synaptic),
-  weight(GetW, B1, bias),
-  NewB is B1 + Err,
-  updata_weight(GetW, NewB, bias).
+  updata_weight(Name, NewW, synaptic),
+  weight(Name, B, bias),
+  NewB is B + Err,
+  updata_weight(Name, NewB, bias).
 
 adjust_weights([], _, []).
 adjust_weights([Hw|Tw], Err, [H|T]) :-
