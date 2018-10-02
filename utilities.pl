@@ -1,3 +1,9 @@
+:- dynamic(totalEpoch/1). % For epoch info
+:- dynamic(weight/3).
+:- dynamic(error/2).
+:- dynamic(data/2).
+:- dynamic(loss/1).
+
 % Retract and Asserta
 updata_err(E, Val) :-
   % writeln([E,Val]),
@@ -17,7 +23,9 @@ clenaer() :-
   retract(totalEpoch(_)),
   updata_weight(p1, [], synaptic),
   updata_weight(p1, inf, bias),
-  updata_err(e1, inf).
+  updata_err(e1, 0),
+  retract(loss(_)),
+  asserta(loss(inf)).
 
 % Random List
 random_list(0, []).
@@ -56,6 +64,7 @@ perception(Name, X, Rta) :-
   weight(Name, B, bias),
   MB is Mrta + B,
   step(MB, Rta).
+% perception init weight
 perception(Name, X, Rta) :-
   X \= [],
   length_list(X, LenX),
@@ -66,15 +75,40 @@ perception(Name, X, Rta) :-
   perception(Name, X, Rta).
 
 % adjust
-adjust_weights(Name, Err) :-
+adjust_weights(Name, XElist) :-
   weight(Name, W, synaptic),
-  adjust_weights(W, Err, NewW),
-  updata_weight(Name, NewW, synaptic),
-  weight(Name, B, bias),
-  NewB is B + Err,
-  updata_weight(Name, NewB, bias).
+  sum_ele_by_ele_in_list(W, XElist, NewW),
+  updata_weight(Name, NewW, synaptic).
 
-adjust_weights([], _, []).
-adjust_weights([Hw|Tw], Err, [H|T]) :-
-  adjust_weights(Tw, Err, T),
-  H is Hw + Err.
+% Multipluca elemento por elemento.
+sum_ele_by_ele_in_list([], [], []).
+sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
+  H is H1 + H2,
+  sum_ele_by_ele_in_list(T1, T2, Rta).
+
+% Multipluca elemento por elemento.
+multi_ele_to_list([], [], []).
+multi_ele_to_list([H1|T1], [H2|T2], [H|Rta]) :-
+  H is H1 * H2,
+  multi_ele_to_list(T1, T2, Rta).
+
+% Add a value to the items in the list
+% add_value_to_items_list([], _, []).
+% add_value_to_items_list([Hw|Tw], Err, [H|T]) :-
+%   add_value_to_items_list(Tw, Err, T),
+%   H is Hw + Err.
+
+make_list_of_ele(0, _, []).
+make_list_of_ele(C, Err, Rta) :-
+  C > 0,
+  C1 is C - 1,
+  Rta = [Err|T],
+  make_list_of_ele(C1, Err, T).
+
+calc_loss(Name) :-
+  error(Name, E),
+  data(X, _),
+  length_list(X, LenX),
+  Loss is E div LenX,
+  retract(loss(_)),
+  asserta(loss(Loss)).

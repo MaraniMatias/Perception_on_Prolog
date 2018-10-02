@@ -1,7 +1,3 @@
-:- dynamic(totalEpoch/1). % For epoch info
-:- dynamic(weight/3).
-:- dynamic(error/2).
-:- dynamic(data/2).
 :- ['./utilities.pl'].
 
 % data([], label).
