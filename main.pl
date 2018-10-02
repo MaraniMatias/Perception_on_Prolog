@@ -35,8 +35,8 @@ info(Epoch) :-
   --- Summary  Epoch ~w ---
   Weights: ~w
   Bias: ~w
-  Error: ~w
-  Loss: ~w
+  Error: ~2f
+  Loss: ~2f
   ~n', [Run, W1, B1, Error, Loss]).
 
 info(Epoch) :-
@@ -51,7 +51,7 @@ epoch(Epoch) :-
   Epoch \= 0,
   data(X, Label),
   retract(data(X, Label)),
-  perception(p1, X, P1), writeln(['Predic:', P1,'Real:', Label]),
+  perception(p1, X, P1), writeln(['Real:', Label,'Predic:',P1]),
   Err is Label - P1,
 
   length_list(X, LenX),
@@ -63,17 +63,17 @@ epoch(Epoch) :-
 
   weight(p1, B, bias),
   NewB is B + Err,
-  updata_weight(p1, NewB, bias),
+  save_weight(p1, NewB, bias),
 
   info(Epoch),
-  % error(e1, E),
-  % SErr is E + Err * Err,
-  % updata_err(e1, SErr),
+  error(e1, E),
+  SErr is E + Err * Err,
+  save_err(e1, SErr),
   epoch(Epoch).
 % loop by Epoch
 epoch(Epoch) :-
   Epoch \= 0,
   openDataSet,
-  % calc_loss(e1),
+  calc_loss(e1),
   NextEpoch is Epoch - 1,
   epoch(NextEpoch).

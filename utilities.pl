@@ -5,15 +5,15 @@
 :- dynamic(loss/1).
 
 % Retract and Asserta
-updata_err(E, Val) :-
+save_err(E, Val) :-
   writeln(['E: ',Val]),
   retract(error(E, _)),
   asserta(error(E, Val)).
-updata_weight(W, Val, bias) :-
+save_weight(W, Val, bias) :-
   writeln(['B: ',Val]),
   retract(weight(W, _, bias)),
   asserta(weight(W, Val, bias)).
-updata_weight(W, Val, synaptic) :-
+save_weight(W, Val, synaptic) :-
   writeln(['W: ',Val]),
   retract(weight(W, _, synaptic)),
   asserta(weight(W, Val, synaptic)).
@@ -21,9 +21,9 @@ updata_weight(W, Val, synaptic) :-
 % Re-set weight values
 clenaer() :-
   retract(totalEpoch(_)),
-  updata_weight(p1, [], synaptic),
-  updata_weight(p1, inf, bias),
-  updata_err(e1, 0),
+  save_weight(p1, [], synaptic),
+  save_weight(p1, inf, bias),
+  save_err(e1, 0),
   retract(loss(_)),
   asserta(loss(inf)).
 
@@ -69,16 +69,16 @@ perception(Name, X, Rta) :-
   X \= [],
   length_list(X, LenX),
   random_list(LenX, W),
-  updata_weight(Name, W, synaptic),
+  save_weight(Name, W, synaptic),
   random(B),
-  updata_weight(Name, B, bias),
+  save_weight(Name, B, bias),
   perception(Name, X, Rta).
 
 % adjust
 adjust_weights(Name, XElist) :-
   weight(Name, W, synaptic),
   sum_ele_by_ele_in_list(W, XElist, NewW),
-  updata_weight(Name, NewW, synaptic).
+  save_weight(Name, NewW, synaptic).
 
 % Multipluca elemento por elemento.
 sum_ele_by_ele_in_list([], [], []).
