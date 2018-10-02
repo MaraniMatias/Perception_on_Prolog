@@ -77,13 +77,21 @@ epoch(Epoch) :-
   multi_ele_to_list(X, Elist, XElist),
   adjust_weights(p1, XElist),
   adjust_weights(p2, XElist),
-  adjust_weights(p3, XElist),
 
-  weight(p1, B1, bias),  NewB1 is B1 + Err,
+  % Make list Elist is [Err,Err,...]
+  make_list_of_ele(2, Err, Elist2),
+  % Make list XElist is [X1*Err,X2*Err,...]
+  multi_ele_to_list([P1, P2], Elist2, XElist2),
+  adjust_weights(p3, XElist2),
+
+  weight(p1, B1, bias),
+  NewB1 is B1 + Err,
   save_weight(p1, NewB1, bias),
-  weight(p2, B2, bias),  NewB2 is B2 + Err,
+  weight(p2, B2, bias),
+  NewB2 is B2 + Err,
   save_weight(p2, NewB2, bias),
-  weight(p3, B3, bias),  NewB3 is B3 + Err,
+  weight(p3, B3, bias),
+  NewB3 is B3 + Err,
   save_weight(p3, NewB3, bias),
 
   calc_loss(Err, Loss), % Loss or MSE
