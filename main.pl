@@ -3,10 +3,10 @@
 % data([], label).
 openDataSet :-
   retractall(data(_,_)),
-% consult('./database/and.pl').
+  consult('./database/and.pl').
 % consult('./database/or.pl').
 % consult('./database/par.pl').
-  consult('./database/impar.pl').
+% consult('./database/impar.pl').
 % consult('./database/mayor_5.pl').
 % consult('./database/xor.pl').
 :- openDataSet.
@@ -14,7 +14,7 @@ openDataSet :-
 weight(p1, [], synaptic).
 weight(p1, 0, bias).
 error(e1, 0).
-learning_rate(0.01).
+learning_rate(0.5).
 loss(inf).
 
 % info only if epoch change
