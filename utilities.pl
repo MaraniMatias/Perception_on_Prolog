@@ -2,7 +2,6 @@
 :- dynamic(weight/3).
 :- dynamic(error/2).
 :- dynamic(data/2).
-:- dynamic(loss/1).
 
 % Retract and Asserta
 save_err(E, Val) :-
@@ -23,9 +22,7 @@ clenaer() :-
   retract(totalEpoch(_)),
   save_weight(p1, [], synaptic),
   save_weight(p1, inf, bias),
-  save_err(e1, 0),
-  retract(loss(_)),
-  asserta(loss(inf)).
+  save_err(e1, 0).
 
 % Random List
 random_list(0, []).
@@ -47,6 +44,14 @@ produc_dot([], [], 0).
 produc_dot([H1|T1], [H2|T2], Rta) :-
  produc_dot(T1, T2, Rta1),
  Rta is Rta1 + H1 * H2.
+
+% Calculate the mean square error
+calc_loss(Err, Loss) :-
+  error(e1, SE),
+  SErr is SE + Err * Err,
+  save_err(e1, SErr),
+  data_length(Count),
+  Loss is SErr rdiv Count.
 
 % Funcion de activacion
 % https://en.wikipedia.org/wiki/Activation_function
@@ -106,11 +111,3 @@ make_list_of_ele(C, Err, Rta) :-
   H is Lr * Err,
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
-
-calc_loss(Name) :-
-  error(Name, E),
-  data(X, _),
-  length_list(X, LenX),
-  Loss is E div LenX,
-  retract(loss(_)),
-  asserta(loss(Loss)).
