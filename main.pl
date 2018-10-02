@@ -18,9 +18,9 @@ learning_rate(0.01).
 loss(inf).
 
 % info only if epoch change
-info(Epoch) :-
-  weight(p1, W1, synaptic), writeln(['W1', W1]),
-  weight(p1, B1, bias), writeln(['B1', B1]),
+info(_) :-
+  % weight(p1, W1, synaptic), writeln(['W1', W1]),
+  % weight(p1, B1, bias), writeln(['B1', B1]),
   % error(e1, Error), writeln(['Err', Error]),
   data(_, _).
 info(Epoch) :-
@@ -63,14 +63,12 @@ epoch(Epoch) :-
 
   weight(p1, B, bias),
   NewB is B + Err,
-  updata_weight(Name, NewB, bias),
+  updata_weight(p1, NewB, bias),
 
   info(Epoch),
-
   % error(e1, E),
   % SErr is E + Err * Err,
   % updata_err(e1, SErr),
-
   epoch(Epoch).
 % loop by Epoch
 epoch(Epoch) :-

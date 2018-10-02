@@ -6,15 +6,15 @@
 
 % Retract and Asserta
 updata_err(E, Val) :-
-  % writeln([E,Val]),
+  writeln(['E: ',Val]),
   retract(error(E, _)),
   asserta(error(E, Val)).
 updata_weight(W, Val, bias) :-
-  % writeln([b,Val]),
+  writeln(['B: ',Val]),
   retract(weight(W, _, bias)),
   asserta(weight(W, Val, bias)).
 updata_weight(W, Val, synaptic) :-
-  % writeln([W,Val]),
+  writeln(['W: ',Val]),
   retract(weight(W, _, synaptic)),
   asserta(weight(W, Val, synaptic)).
 
@@ -102,7 +102,9 @@ make_list_of_ele(0, _, []).
 make_list_of_ele(C, Err, Rta) :-
   C > 0,
   C1 is C - 1,
-  Rta = [Err|T],
+  learning_rate(Lr),
+  H is Lr * Err,
+  Rta = [H|T],
   make_list_of_ele(C1, Err, T).
 
 calc_loss(Name) :-
