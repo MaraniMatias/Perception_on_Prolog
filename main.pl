@@ -3,10 +3,10 @@
 % data([], label).
 openDataSet :-
   retractall(data(_,_)),
-%  consult('./database/and.pl').
-  consult('./database/or.pl').
+% consult('./database/and.pl').
+% consult('./database/or.pl').
 % consult('./database/par.pl').
-% consult('./database/impar.pl').
+  consult('./database/impar.pl').
 % consult('./database/mayor_5.pl').
 % consult('./database/xor.pl').
 :- openDataSet.
@@ -27,7 +27,6 @@ info(Epoch) :-
   totalEpoch(TotalEpoch),
   weight(p1, W1, synaptic),
   weight(p1, B1, bias),
-  error(e1, Error),
   loss(Loss),
 
   Run is TotalEpoch - Epoch + 1,
@@ -35,9 +34,8 @@ info(Epoch) :-
   --- Summary  Epoch ~w ---
   Weights: ~w
   Bias: ~w
-  Error: ~2f
   Loss: ~2f
-  ~n', [Run, W1, B1, Error, Loss]).
+  ~n', [Run, W1, B1, Loss]).
 
 info(Epoch) :-
   asserta(totalEpoch(Epoch)),

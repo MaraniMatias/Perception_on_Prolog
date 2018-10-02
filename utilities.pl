@@ -6,15 +6,15 @@
 
 % Retract and Asserta
 save_err(E, Val) :-
-  writeln(['E: ',Val]),
+  % writeln(['E: ',Val]),
   retract(error(E, _)),
   asserta(error(E, Val)).
 save_weight(W, Val, bias) :-
-  writeln(['B: ',Val]),
+  % writeln(['B: ',Val]),
   retract(weight(W, _, bias)),
   asserta(weight(W, Val, bias)).
 save_weight(W, Val, synaptic) :-
-  writeln(['W: ',Val]),
+  % writeln(['W: ',Val]),
   retract(weight(W, _, synaptic)),
   asserta(weight(W, Val, synaptic)).
 
