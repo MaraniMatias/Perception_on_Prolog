@@ -17,7 +17,7 @@ openDataSet :-
 weight(p1, [], synaptic).
 weight(p1, 0, bias).
 error(e1, 0).
-learning_rate(0.5).
+learning_rate(0.9).
 loss(inf).
 
 % info only if epoch change
@@ -52,7 +52,8 @@ epoch(Epoch) :-
 
   data(X, Label),
   retract(data(X, Label)),
-  perception(p1, X, P1), writeln(['Real:', Label,'Predic:',P1]),
+  perception(p1, X, P1),
+  % writeln(['Real:', Label,'Predic:',P1]),
   Err is Label - P1,
 
   length_list(X, LenX),
