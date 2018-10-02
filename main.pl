@@ -18,7 +18,6 @@ weight(p1, [], synaptic).
 weight(p1, 0, bias).
 error(e1, 0).
 learning_rate(0.9).
-loss(inf).
 
 % info only if epoch change
 info(_, _) :-
