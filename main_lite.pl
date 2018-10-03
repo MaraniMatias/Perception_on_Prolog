@@ -18,8 +18,9 @@ openDataSet :-
   asserta(data_length(Count)).
 
 data_length(0).
+learning_rate(0.1).
 weight(synaptic, []).
-weight(bias, 0).
+weight(bias, 1).
 error(0).
 
 % Retract and Asserta
@@ -75,30 +76,29 @@ step(X, 1) :-
   X > 0.
 step(_, 0). % 0 or -1
 
-% perception
-perception(X, Rta) :-
-  X \= [],
+perceptron([], _) :-
+  fail.
+% perceptron init weight
+perceptron(X, Rta) :-
+  weight(synaptic, []),
+  length_list(X, LenX),
+  random_list(LenX, W),
+  save_weight(synaptic, W),
+  perceptron(X, Rta).
+% perceptron
+perceptron(X, Rta) :-
   weight(synaptic, W),
-  W \= [],
   produc_dot(X, W, Mrta),
   weight(bias, B),
   MB is Mrta + B,
   step(MB, Rta).
-% perception init weight
-perception(X, Rta) :-
-  X \= [],
-  length_list(X, LenX),
-  random_list(LenX, W),
-  save_weight(synaptic, W),
-  random(B),
-  save_weight(bias, B),
-  perception(X, Rta).
 
 % adjust
-adjust_weights(XElist) :-
+% Elist is [Err*LR,Err*LR,...]
+adjust_weights(Elist) :-
   weight(synaptic, W),
-  sum_ele_by_ele_in_list(W, XElist, NewW),
-  save_weight(synaptic, NewW),
+  sum_ele_by_ele_in_list(W, Elist, NewW),
+  save_weight(synaptic, NewW).
 
 % Add the elements of the lists that are in
 % the same position and create another list
@@ -107,17 +107,12 @@ sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 + H2,
   sum_ele_by_ele_in_list(T1, T2, Rta).
 
-% Multiply the elements of the lists that are
-% in the same position and create another list
-multi_ele_to_list([], [], []).
-multi_ele_to_list([H1|T1], [H2|T2], [H|Rta]) :-
-  H is H1 * H2,
-  multi_ele_to_list(T1, T2, Rta).
-
 make_list_of_ele(0, _, []).
-make_list_of_ele(C, Err, [Err|T]) :-
+make_list_of_ele(C, Err, [H|T]) :-
   C > 0,
   C1 is C - 1,
+  learning_rate(LR),
+  H is Err * LR,
   make_list_of_ele(C1, Err, T).
 
 % info only if epoch change
@@ -149,20 +144,14 @@ epoch(Epoch) :-
 
   data(X, Label),
   retract(data(X, Label)),
-  perception(X, P1),
+  perceptron(X, P1),
   writeln(['Real:', Label,'Predic:',P1]),
   Err is Label - P1,
 
   length_list(X, LenX),
-  % Make list Elist is [Err,Err,...]
+  % Make list Elist is [Err*LR,Err*LR,...]
   make_list_of_ele(LenX, Err, Elist),
-  % Make list XElist is [X1*Err,X2*Err,...]
-  multi_ele_to_list(X, Elist, XElist),
-  adjust_weights( XElist),
-
-  weight(bias, B),
-  NewB is B + Err,
-  save_weight(bias, NewB),
+  adjust_weights(Elist),
 
   calc_loss(Err, Loss), % Loss or MSE
   info(Epoch, Loss),

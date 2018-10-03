@@ -52,7 +52,7 @@ epoch(Epoch) :-
 
   data(X, Label),
   retract(data(X, Label)),
-  perception(p1, X, P1),
+  perceptron(p1, X, P1),
   % writeln(['Real:', Label,'Predic:',P1]),
   Err is Label - P1,
 

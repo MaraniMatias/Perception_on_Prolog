@@ -43,11 +43,11 @@ info(Epoch, Loss) :-
   Run is TotalEpoch - Epoch + 1,
   format('
   --- Summary  Epoch ~w ---
-  Weights of perception 1: ~w
+  Weights of perceptron 1: ~w
   Bias: ~w
-  Weights of perception 2: ~w
+  Weights of perceptron 2: ~w
   Bias: ~w
-  Weights of perception 3: ~w
+  Weights of perceptron 3: ~w
   Bias: ~w
   Loss: ~4f
   ', [Run, W1, B1, W2, B2, W3, B3, Loss]).
@@ -65,9 +65,9 @@ epoch(Epoch) :-
 
   data(X, Label),
   retract(data(X, Label)),
-  perception(p1, X, P1),
-  perception(p2, X, P2),
-  perception(p3, [P1, P2], P3),
+  perceptron(p1, X, P1),
+  perceptron(p2, X, P2),
+  perceptron(p3, [P1, P2], P3),
   writeln(['Real:', Label,'Predic:',P3]),
   Err is Label - P3,
 
