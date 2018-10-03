@@ -38,7 +38,7 @@ data([1, 1, 1, 1, 0, 1, 1], 0).% 9
 
 En el archivo `main.pl`
 ```prolog
-?- epoch(300).
+?- epoch(10).
 ```
 
 ## Problema XOR
@@ -55,5 +55,5 @@ Para estos problemas necesitamos tres preceptrones
 
 En el archivo `main-three-perception.pl`
 ```prolog
-?- epoch(300).
+?- epoch(100).
 ```
