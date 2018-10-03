@@ -4,6 +4,7 @@
 % data([], label).
 openDataSet :-
   retractall(data(_,_)),
+  retract(data_length(_)),
 % consult('./database/and.pl'),
 % consult('./database/or.pl'),
 % consult('./database/par.pl'),
@@ -12,8 +13,8 @@ openDataSet :-
   consult('./database/xor.pl'),
   aggregate_all(count, data(_,_), Count),
   asserta(data_length(Count)).
-:- openDataSet.
 
+data_length(0).
 weight(p1, [], synaptic).
 weight(p2, [], synaptic).
 weight(p3, [], synaptic).
@@ -56,11 +57,11 @@ info(Epoch, Loss) :-
   info(Epoch, Loss).
 
 % epoch
-epoch(0) :-
+epoch(-1) :-
   clenaer().
 % loop by data
 epoch(Epoch) :-
-  Epoch \= 0,
+  Epoch >= 0,
 
   data(X, Label),
   retract(data(X, Label)),
@@ -99,7 +100,7 @@ epoch(Epoch) :-
   epoch(Epoch).
 % loop by Epoch
 epoch(Epoch) :-
-  Epoch \= 0,
+  Epoch >= 0,
   openDataSet,
   NextEpoch is Epoch - 1,
   save_err(e1, 0),

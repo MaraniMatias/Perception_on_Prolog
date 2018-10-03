@@ -19,6 +19,7 @@ save_weight(W, Val, synaptic) :-
 
 % Re-set weight values
 clenaer() :-
+  retractall(data(_,_)),
   retract(totalEpoch(_)),
   save_weight(p1, [], synaptic),
   save_weight(p1, inf, bias),
@@ -85,13 +86,15 @@ adjust_weights(Name, XElist) :-
   sum_ele_by_ele_in_list(W, XElist, NewW),
   save_weight(Name, NewW, synaptic).
 
-% Multipluca elemento por elemento.
+% Add the elements of the lists that are in
+% the same position and create another list
 sum_ele_by_ele_in_list([], [], []).
 sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 + H2,
   sum_ele_by_ele_in_list(T1, T2, Rta).
 
-% Multipluca elemento por elemento.
+% Multiply the elements of the lists that are
+% in the same position and create another list
 multi_ele_to_list([], [], []).
 multi_ele_to_list([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 * H2,
