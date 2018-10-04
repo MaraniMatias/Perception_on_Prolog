@@ -162,6 +162,7 @@ epoch(Epoch) :-
   multi_ele_to_list(X, Elist, XElist),
   adjust_weights(XElist),
 
+  % Logic AND need this code
   % weight(bias, B),
   % NewB is B + Err,
   % save_weight(bias, NewB),

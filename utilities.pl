@@ -22,7 +22,7 @@ clenaer() :-
   retractall(data(_,_)),
   retract(totalEpoch(_)),
   save_weight(p1, [], synaptic),
-  save_weight(p1, inf, bias),
+  save_weight(p1, 0, bias),
   save_err(e1, 0).
 
 % Random List
@@ -61,24 +61,24 @@ step(X, 1) :-
   X > 0.
 step(_, 0). % 0 or -1
 
-% perception
-perception(Name, X, Rta) :-
-  X \= [],
-  weight(Name, W, synaptic),
-  W \= [],
-  produc_dot(X, W, Mrta),
-  weight(Name, B, bias),
-  MB is Mrta + B,
-  step(MB, Rta).
-% perception init weight
-perception(Name, X, Rta) :-
-  X \= [],
+perceptron(_, [], _) :-
+  fail.
+% perceptron init weight
+perceptron(Name, X, Rta) :-
+  weight(Name, [], synaptic),
   length_list(X, LenX),
   random_list(LenX, W),
   save_weight(Name, W, synaptic),
   random(B),
   save_weight(Name, B, bias),
-  perception(Name, X, Rta).
+  perceptron(Name, X, Rta).
+% perception
+perceptron(Name, X, Rta) :-
+  weight(Name, W, synaptic),
+  produc_dot(X, W, Mrta),
+  weight(Name, B, bias),
+  MB is Mrta + B,
+  step(MB, Rta).
 
 % adjust
 adjust_weights(Name, XElist) :-
@@ -110,7 +110,7 @@ make_list_of_ele(0, _, []).
 make_list_of_ele(C, Err, Rta) :-
   C > 0,
   C1 is C - 1,
-  learning_rate(Lr),
-  H is Lr * Err,
+  learning_rate(LR),
+  H is Err * LR,
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
