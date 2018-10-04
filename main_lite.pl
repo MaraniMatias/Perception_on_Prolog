@@ -8,17 +8,17 @@
 openDataSet :-
   retractall(data(_,_)),
   retract(data_length(_)),
-  consult('./database/and.pl'),
+% consult('./database/and.pl'),
 % consult('./database/or.pl'),
 % consult('./database/par.pl'),
-% consult('./database/impar.pl'),
+  consult('./database/impar.pl'),
 % consult('./database/mayor_5.pl'),
 % consult('./database/xor.pl'),
   aggregate_all(count, data(_,_), Count),
   asserta(data_length(Count)).
 
 data_length(0).
-learning_rate(0.1).
+learning_rate(0.5).
 weight(synaptic, []).
 weight(bias, 1).
 error(0).
@@ -38,7 +38,7 @@ clenaer() :-
   retractall(data(_,_)),
   retract(totalEpoch(_)),
   save_weight(synaptic, []),
-  save_weight(bias, inf),
+  save_weight(bias, 1),
   save_err(0).
 
 % Random List
@@ -107,6 +107,13 @@ sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 + H2,
   sum_ele_by_ele_in_list(T1, T2, Rta).
 
+% Multiply the elements of the lists that are
+% in the same position and create another list
+multi_ele_to_list([], [], []).
+multi_ele_to_list([H1|T1], [H2|T2], [H|Rta]) :-
+  H is H1 * H2,
+  multi_ele_to_list(T1, T2, Rta).
+
 make_list_of_ele(0, _, []).
 make_list_of_ele(C, Err, [H|T]) :-
   C > 0,
@@ -151,7 +158,13 @@ epoch(Epoch) :-
   length_list(X, LenX),
   % Make list Elist is [Err*LR,Err*LR,...]
   make_list_of_ele(LenX, Err, Elist),
-  adjust_weights(Elist),
+  % Make list XElist is [X1*Err,X2*Err,...]
+  multi_ele_to_list(X, Elist, XElist),
+  adjust_weights(XElist),
+
+  % weight(bias, B),
+  % NewB is B + Err,
+  % save_weight(bias, NewB),
 
   calc_loss(Err, Loss), % Loss or MSE
   info(Epoch, Loss),
