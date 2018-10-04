@@ -1,6 +1,12 @@
 :- dynamic(data_length/1).
 :- ['./utilities.pl'].
 
+data_length(0).
+weight(p1, [], synaptic).
+weight(p1, 0, bias).
+error(e1, 0).
+learning_rate(0.9).
+
 % data([], label).
 openDataSet :-
   retractall(data(_,_)),
@@ -13,12 +19,7 @@ openDataSet :-
 % consult('./database/xor.pl'),
   aggregate_all(count, data(_,_), Count),
   asserta(data_length(Count)).
-
-data_length(0).
-weight(p1, [], synaptic).
-weight(p1, 0, bias).
-error(e1, 0).
-learning_rate(0.9).
+% ?- openDataSet. % Load dataset...
 
 % info only if epoch change
 info(_, _) :-
