@@ -33,6 +33,11 @@ save_weight(Type, Val) :-
   retract(weight(Type, _)),
   asserta(weight(Type, Val)).
 
+save_to_file(Fact) :-
+  tell('./weight.data'),
+  listing(Fact),
+  told.
+
 % Re-set weight values
 clenaer() :-
   retractall(data(_,_)),
@@ -144,6 +149,7 @@ info(Epoch, Loss) :-
 
 % epoch
 epoch(-1) :-
+  save_to_file(weight),
   clenaer().
 % loop by data
 epoch(Epoch) :-
