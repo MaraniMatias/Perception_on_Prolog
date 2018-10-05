@@ -1,3 +1,6 @@
+% Make a log file
+:- protocola('perceptron.log').
+
 :- dynamic(data_length/1).
 :- dynamic(totalEpoch/1). % For epoch info
 :- dynamic(weight/2).
@@ -158,7 +161,7 @@ epoch(Epoch) :-
   data(X, Label),
   retract(data(X, Label)),
   perceptron(X, P1),
-  writeln(['Real:', Label,'Predic:',P1]),
+  format('~t[INFO] real: ~w - predic: ~w~n', [Label, P1]),
   Err is Label - P1,
 
   length_list(X, LenX),
