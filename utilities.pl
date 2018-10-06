@@ -12,33 +12,37 @@ save_err(Val) :-
   % writeln(['E: ',Val]),
   retract(error(_)),
   asserta(error(Val)).
+
 save_weight(P, Val, bias) :-
   % writeln([P, 'B: ',Val]),
   retract(weight(P, _, bias)),
   asserta(weight(P, Val, bias)).
+save_weight(P, Val, bias) :-
+  asserta(weight(P, Val, bias)).
+
 save_weight(P, Val, synaptic) :-
   % writeln([P, 'W: ',Val]),
   retract(weight(P, _, synaptic)),
   asserta(weight(P, Val, synaptic)).
+save_weight(P, Val, synaptic) :-
+  asserta(weight(P, Val, synaptic)).
+
 save_loss(Val) :-
   % writeln(['loss: ',Val]),
   retract(loss(_)),
   asserta(loss(Val)).
 
-% Re-set weight values
-clenaer() :-
-  retractall(data(_,_)),
-  retract(totalEpoch(_)),
-  save_weight(p1, [], synaptic),
-  save_weight(p1, 0, bias),
-  save_err(0),
-  save_loss(0).
+save_to_file(Fact) :-
+  tell('./weight.data'),
+  listing(Fact),
+  told.
 
+% Re-set weight values
 clenaer([]) :-
   retractall(data(_, _)),
   retract(totalEpoch(_)),
   save_err(0),
-  save_loss(0).
+  save_loss(inf).
 clenaer([P|T]) :-
   save_weight(P, [], synaptic),
   save_weight(P, 0, bias),
@@ -74,12 +78,24 @@ calc_loss(Err) :-
   Loss is SErr rdiv Count,
   save_loss(Loss).
 
-% Funcion de activacion
+pow(_, 0, 1).
+pow(X, Y, Z) :-
+  Y1 is Y - 1,
+  pow(X, Y1, Z1),
+  Z is Z1 * X.
+
+% activation function
 % https://en.wikipedia.org/wiki/Activation_function
 % Step
 step(X, 1) :-
   X > 0.
 step(_, 0). % 0 or -1
+
+% sigmiod
+sigmoid(X, Y) :-
+  Y2 is pow(e, -X),
+  Y1 is 1 + Y2,
+  Y is 1 rdiv Y1.
 
 perceptron(_, [], _) :-
   fail.
@@ -104,6 +120,7 @@ perceptron(Name, X, Rta) :-
 adjust_weights(Name, XElist) :-
   weight(Name, W, synaptic),
   sum_ele_by_ele_in_list(W, XElist, NewW),
+  % writeln(W),  writeln(NewW),
   save_weight(Name, NewW, synaptic).
 
 % Add the elements of the lists that are in
@@ -134,7 +151,6 @@ make_list_of_ele(C, Err, Rta) :-
   H is Err * LR,
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
-
 
 % Ajusta pesos de una lista de perceptron
 adjust_net_weights([], _, _).

@@ -1,14 +1,14 @@
+% Make a log file
+:- protocola('main.log').
 :- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
-weight(p1, [], synaptic).
-weight(p1, 0, bias).
 learning_rate(0.9).
 
 data_length(0).
 % data([], label).
 openDataSet :-
-  retractall(data(_,_)),
+  retractall(data(_, _)),
   retract(data_length(_)),
 % consult('./database/and.pl'),
 % consult('./database/or.pl'),
@@ -16,9 +16,8 @@ openDataSet :-
   consult('./database/impar.pl'),
 % consult('./database/mayor_5.pl'),
 % consult('./database/xor.pl'),
-  aggregate_all(count, data(_,_), Count),
+  aggregate_all(count, data(_, _), Count),
   asserta(data_length(Count)).
-% ?- openDataSet. % Load dataset...
 
 % info only if epoch change
 info(_) :-
@@ -46,7 +45,7 @@ info(Epoch) :-
 
 % epoch
 epoch(-1) :-
-  clenaer().
+  clenaer([p1]).
 % loop by data
 epoch(Epoch) :-
   Epoch >= 0,
@@ -68,6 +67,8 @@ epoch(Epoch) :-
   NewB is B + Err,
   save_weight(p1, NewB, bias),
 
+  % adjust_net_weights([p1], X, Err),
+
   calc_loss(Err), % Loss or MSE
   info(Epoch),
   epoch(Epoch).
@@ -82,3 +83,5 @@ epoch(Epoch) :-
   NextEpoch is Epoch - 1,
   save_err(0),
   epoch(NextEpoch).
+% Load weights for preceptron
+:- epoch(-1).
