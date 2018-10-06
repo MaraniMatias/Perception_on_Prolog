@@ -22,7 +22,7 @@ openDataSet :-
   asserta(data_length(Count)).
 
 data_length(0).
-learning_rate(1).
+learning_rate(0.5).
 weight(synaptic, []).
 weight(bias, 1).
 error(0). % by epoch
@@ -112,20 +112,24 @@ perceptron(X, Rta) :-
   step(MB, Rta).
 
 % adjust
-adjust_weights('+') :-
+adjust_weights('-') :-
   learning_rate(LR),
-  error(Err),
+  % error(Err),
   weight(synaptic, W),
   length_list(W, LenX),
-  ErrLR is LR * Err,
-  make_list_of_ele(LenX, ErrLR, List),
+  % ErrLR is LR * Err,
+  % make_list_of_ele(LenX, ErrLR, List),
+  make_list_of_ele(LenX, LR, List),
   subtract_ele_by_ele_in_list(W, List, NewW),
   save_weight(synaptic, NewW).
 
-adjust_weights('-') :-
+adjust_weights('+') :-
   learning_rate(LR),
+  % error(Err),
   weight(synaptic, W),
   length_list(W, LenX),
+  % ErrLR is LR * Err,
+  % make_list_of_ele(LenX, ErrLR, List),
   make_list_of_ele(LenX, LR, List),
   add_ele_by_ele_in_list(W, List, NewW),
   save_weight(synaptic, NewW).
@@ -221,7 +225,7 @@ epoch(Epoch) :-
 % loop by Epoch
 epoch(Epoch) :-
   Epoch >= 0,
-  adjust_weights('+'),
+  adjust_weights('-'),
   nextEpoch(Epoch).
 
 nextEpoch(Epoch) :-
