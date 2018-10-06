@@ -1,5 +1,5 @@
 % Make a log file
-:- protocola('main.log').
+:- protocola('log_main.log').
 :- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
