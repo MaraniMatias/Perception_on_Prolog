@@ -98,6 +98,10 @@ epoch(Epoch) :-
   calc_loss(Err), % Loss or MSE
   info(Epoch),
   epoch(Epoch).
+% if loos is 0, stop loop
+epoch(_) :-
+  loss(0),
+  epoch(-1).
 % loop by Epoch
 epoch(Epoch) :-
   Epoch >= 0,

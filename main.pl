@@ -1,12 +1,11 @@
-:- dynamic(data_length/1).
+:- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
-data_length(0).
 weight(p1, [], synaptic).
 weight(p1, 0, bias).
-error(0).
 learning_rate(0.9).
 
+data_length(0).
 % data([], label).
 openDataSet :-
   retractall(data(_,_)),
@@ -72,6 +71,10 @@ epoch(Epoch) :-
   calc_loss(Err), % Loss or MSE
   info(Epoch),
   epoch(Epoch).
+% if loos is 0, stop loop
+epoch(_) :-
+  loss(0),
+  epoch(-1).
 % loop by Epoch
 epoch(Epoch) :-
   Epoch >= 0,
