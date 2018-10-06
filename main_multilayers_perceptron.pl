@@ -88,11 +88,12 @@ epoch(Epoch) :-
   format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Label]),
   Err is Label - P_Output,
 
-  adjust_net_weights([p1_c1, p2_c1, p3_c1, p4_c1, p5_c1], X, Err),
-  Err1 is 0.7 * Err,
+  Err1 is 0.5 * Err,
+  adjust_net_weights([p1_c1, p2_c1, p3_c1, p4_c1, p5_c1], X, Err1),
+  Err1 is 0.1 * Err,
   adjust_net_weights([p1_c2, p2_c2, p3_c2], [P1_C1, P2_C1, P3_C1, P4_C1, P5_C1], Err1),
-  Err2 is 0.9 * Err,
-  adjust_net_weights([p1_ouput], [P1_C2, P2_C2, P3_C2], Err2),
+  % Err2 is 0.9 * Err,
+  % adjust_net_weights([p1_ouput], [P1_C2, P2_C2, P3_C2], Err2),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),

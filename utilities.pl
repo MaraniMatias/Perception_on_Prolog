@@ -5,7 +5,7 @@
 :- dynamic loss/1.
 loss(inf).
 error(0).
-totalEpoch(0).
+% totalEpoch(0).
 
 % Retract and Asserta
 save_err(Val) :-
