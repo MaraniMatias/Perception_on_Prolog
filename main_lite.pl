@@ -10,19 +10,24 @@
 
 % data([], label).
 openDataSet :-
-  retractall(data(_,_)),
+  retractall(data(_, _)),
   retract(data_length(_)),
-% consult('./database/and.pl'),
-% consult('./database/or.pl'),
-% consult('./database/par.pl'),
+  consult('./database/par.pl'),
 % consult('./database/impar.pl'),
-  consult('./database/mayor_5.pl'),
+
+% This data needs to adjust the bias.
+% consult('./database/or.pl'),
+% consult('./database/and.pl'),
+% consult('./database/mayor_5.pl'),
+
+% It will never learn this information
 % consult('./database/xor.pl'),
-  aggregate_all(count, data(_,_), Count),
+
+  aggregate_all(count, data(_, _), Count),
   asserta(data_length(Count)).
 
 data_length(0).
-learning_rate(0.1).
+learning_rate(0.5).
 weight(synaptic, []).
 weight(bias, 1).
 error(0).
@@ -111,17 +116,28 @@ perceptron(X, Rta) :-
 
 % adjust
 % Elist is [Err*LR,Err*LR,...]
-adjust_weights(Elist) :-
+adjust_weights(X, Err) :-
   weight(synaptic, W),
-  sum_ele_by_ele_in_list(W, Elist, NewW),
+  length_list(W, LenW),
+
+  % Make list Elist is [Err*LR,Err*LR,...]
+  make_list_of_ele(LenW, Err, Elist),
+  % Make list XElist is [X1*Err,X2*Err,...]
+  multi_ele_to_list(X, Elist, XElist),
+  add_ele_by_ele_in_list(W, XElist, NewW),
+  /*
+  % Make list Elist is [Err*LR,Err*LR,...]
+  make_list_of_ele(LenW, Err, Elist),
+  add_ele_by_ele_in_list(W, Elist, NewW),
+  */
   save_weight(synaptic, NewW).
 
 % Add the elements of the lists that are in
 % the same position and create another list
-sum_ele_by_ele_in_list([], [], []).
-sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
+add_ele_by_ele_in_list([], [], []).
+add_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 + H2,
-  sum_ele_by_ele_in_list(T1, T2, Rta).
+  add_ele_by_ele_in_list(T1, T2, Rta).
 
 % Multiply the elements of the lists that are
 % in the same position and create another list
@@ -173,12 +189,7 @@ epoch(Epoch) :-
   format('~t[INFO] predic: ~w - real: ~w~n', [P1, Label]),
   Err is Label - P1,
 
-  length_list(X, LenX),
-  % Make list Elist is [Err*LR,Err*LR,...]
-  make_list_of_ele(LenX, Err, Elist),
-  % Make list XElist is [X1*Err,X2*Err,...]
-  multi_ele_to_list(X, Elist, XElist),
-  adjust_weights(XElist),
+  adjust_weights(X, Err),
 
   % improve training
   weight(bias, B),
