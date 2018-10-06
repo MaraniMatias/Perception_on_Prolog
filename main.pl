@@ -4,7 +4,7 @@
 data_length(0).
 weight(p1, [], synaptic).
 weight(p1, 0, bias).
-error(e1, 0).
+error(0).
 learning_rate(0.9).
 
 % data([], label).
@@ -22,15 +22,16 @@ openDataSet :-
 % ?- openDataSet. % Load dataset...
 
 % info only if epoch change
-info(_, _) :-
+info(_) :-
   % weight(p1, W1, synaptic), writeln(['W1', W1]),
   % weight(p1, B1, bias), writeln(['B1', B1]),
   % error(e1, Error), writeln(['Err', Error]),
   data(_, _).
-info(Epoch, Loss) :-
+info(Epoch) :-
   totalEpoch(TotalEpoch),
   weight(p1, W1, synaptic),
   weight(p1, B1, bias),
+  loss(Loss),
 
   Run is TotalEpoch - Epoch + 1,
   format('
@@ -40,9 +41,9 @@ info(Epoch, Loss) :-
   Loss: ~4f
   ~n', [Run, W1, B1, Loss]).
 % Run one times
-info(Epoch, Loss) :-
+info(Epoch) :-
   asserta(totalEpoch(Epoch)),
-  info(Epoch, Loss).
+  info(Epoch).
 
 % epoch
 epoch(-1) :-
@@ -68,13 +69,13 @@ epoch(Epoch) :-
   NewB is B + Err,
   save_weight(p1, NewB, bias),
 
-  calc_loss(Err, Loss), % Loss or MSE
-  info(Epoch, Loss),
+  calc_loss(Err), % Loss or MSE
+  info(Epoch),
   epoch(Epoch).
 % loop by Epoch
 epoch(Epoch) :-
   Epoch >= 0,
   openDataSet,
   NextEpoch is Epoch - 1,
-  save_err(e1, 0),
+  save_err(0),
   epoch(NextEpoch).

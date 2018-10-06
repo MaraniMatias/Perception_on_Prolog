@@ -1,21 +1,29 @@
-:- dynamic(totalEpoch/1). % For epoch info
-:- dynamic(weight/3).
-:- dynamic(error/2).
-:- dynamic(data/2).
+:- dynamic totalEpoch/1. % For epoch info
+:- dynamic weight/3.
+:- dynamic error/1.
+:- dynamic data/2.
+:- dynamic loss/1.
+loss(inf).
+error(0).
+totalEpoch(0).
 
 % Retract and Asserta
-save_err(E, Val) :-
+save_err(Val) :-
   % writeln(['E: ',Val]),
-  retract(error(E, _)),
-  asserta(error(E, Val)).
-save_weight(W, Val, bias) :-
-  % writeln(['B: ',Val]),
-  retract(weight(W, _, bias)),
-  asserta(weight(W, Val, bias)).
-save_weight(W, Val, synaptic) :-
-  % writeln(['W: ',Val]),
-  retract(weight(W, _, synaptic)),
-  asserta(weight(W, Val, synaptic)).
+  retract(error(_)),
+  asserta(error(Val)).
+save_weight(P, Val, bias) :-
+  % writeln([P, 'B: ',Val]),
+  retract(weight(P, _, bias)),
+  asserta(weight(P, Val, bias)).
+save_weight(P, Val, synaptic) :-
+  % writeln([P, 'W: ',Val]),
+  retract(weight(P, _, synaptic)),
+  asserta(weight(P, Val, synaptic)).
+save_loss(Val) :-
+  % writeln(['loss: ',Val]),
+  retract(loss(_)),
+  asserta(loss(Val)).
 
 % Re-set weight values
 clenaer() :-
@@ -23,7 +31,18 @@ clenaer() :-
   retract(totalEpoch(_)),
   save_weight(p1, [], synaptic),
   save_weight(p1, 0, bias),
-  save_err(e1, 0).
+  save_err(0),
+  save_loss(0).
+
+clenaer([]) :-
+  retractall(data(_, _)),
+  retract(totalEpoch(_)),
+  save_err(0),
+  save_loss(0).
+clenaer([P|T]) :-
+  save_weight(P, [], synaptic),
+  save_weight(P, 0, bias),
+  clenaer(T).
 
 % Random List
 random_list(0, []).
@@ -47,12 +66,13 @@ produc_dot([H1|T1], [H2|T2], Rta) :-
  Rta is Rta1 + H1 * H2.
 
 % Calculate the mean square error
-calc_loss(Err, Loss) :-
-  error(e1, SE),
+calc_loss(Err) :-
+  error(SE),
   SErr is SE + Err * Err,
-  save_err(e1, SErr),
+  save_err(SErr),
   data_length(Count),
-  Loss is SErr rdiv Count.
+  Loss is SErr rdiv Count,
+  save_loss(Loss).
 
 % Funcion de activacion
 % https://en.wikipedia.org/wiki/Activation_function
@@ -114,3 +134,18 @@ make_list_of_ele(C, Err, Rta) :-
   H is Err * LR,
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
+
+
+% Ajusta pesos de una lista de perceptron
+adjust_net_weights([], _, _).
+adjust_net_weights([Perceptron|T], X, Err) :-
+  length_list(X, LenX),
+  % Make list Elist is [Err*LR,Err*LR,...]
+  make_list_of_ele(LenX, Err, Elist),
+  % Make list XElist is [X1*Err,X2*Err,...]
+  multi_ele_to_list(X, Elist, XElist),
+  adjust_weights(Perceptron, XElist),
+  weight(Perceptron, B, bias),
+  NewB is B + Err,
+  save_weight(Perceptron, NewB, bias),
+  adjust_net_weights(T, X, Err).
