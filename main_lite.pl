@@ -1,11 +1,12 @@
 % Make a log file
 :- protocola('perceptron.log').
 
-:- dynamic(data_length/1).
-:- dynamic(totalEpoch/1). % For epoch info
-:- dynamic(weight/2).
-:- dynamic(error/1).
-:- dynamic(data/2).
+:- dynamic data_length/1.
+:- dynamic totalEpoch/1. % For epoch info
+:- dynamic weight/2.
+:- dynamic error/1.
+:- dynamic data/2.
+:- dynamic loss/1.
 
 % data([], label).
 openDataSet :-
@@ -25,6 +26,7 @@ learning_rate(0.5).
 weight(synaptic, []).
 weight(bias, 1).
 error(0).
+loss(inf).
 
 % Retract and Asserta
 save_err(Val) :-
@@ -35,6 +37,10 @@ save_weight(Type, Val) :-
   % writeln([Type,': ',Val]),
   retract(weight(Type, _)),
   asserta(weight(Type, Val)).
+save_loss(Val) :-
+  % writeln(['loss: ',Val]),
+  retract(loss(_)),
+  asserta(loss(Val)).
 
 save_to_file(Fact) :-
   tell('./weight.data'),
@@ -70,12 +76,13 @@ produc_dot([H1|T1], [H2|T2], Rta) :-
  Rta is Rta1 + H1 * H2.
 
 % Calculate the mean square error
-calc_loss(Err, Loss) :-
+calc_loss(Err) :-
   error(SE),
   SErr is SE + Err * Err,
   save_err(SErr),
   data_length(Count),
-  Loss is SErr rdiv Count.
+  Loss is SErr rdiv Count,
+  save_loss(Loss).
 
 % Funcion de activacion
 % https://en.wikipedia.org/wiki/Activation_function
@@ -131,12 +138,13 @@ make_list_of_ele(C, Err, [H|T]) :-
   make_list_of_ele(C1, Err, T).
 
 % info only if epoch change
-info(_, _) :-
+info(_) :-
   data(_, _).
-info(Epoch, Loss) :-
+info(Epoch) :-
   totalEpoch(TotalEpoch),
   weight(synaptic, W),
   weight(bias, B),
+  loss(Loss),
 
   Run is TotalEpoch - Epoch + 1,
   format('
@@ -145,10 +153,10 @@ info(Epoch, Loss) :-
   Bias: ~w
   Loss: ~4f
   ~n', [Run, W, B, Loss]).
-% Run one times
-info(Epoch, Loss) :-
+% run one only the first time.
+info(Epoch) :-
   asserta(totalEpoch(Epoch)),
-  info(Epoch, Loss).
+  info(Epoch).
 
 % epoch
 epoch(-1) :-
@@ -161,7 +169,7 @@ epoch(Epoch) :-
   data(X, Label),
   retract(data(X, Label)),
   perceptron(X, P1),
-  format('~t[INFO] real: ~w - predic: ~w~n', [Label, P1]),
+  format('~t[INFO] predic: ~w - real: ~w~n', [P1, Label]),
   Err is Label - P1,
 
   length_list(X, LenX),
@@ -176,9 +184,13 @@ epoch(Epoch) :-
   % NewB is B + Err,
   % save_weight(bias, NewB),
 
-  calc_loss(Err, Loss), % Loss or MSE
-  info(Epoch, Loss),
+  calc_loss(Err), % Loss or MSE
+  info(Epoch),
   epoch(Epoch).
+% if loos is 0, stop loop
+epoch(_) :-
+  loss(0),
+  epoch(-1).
 % loop by Epoch
 epoch(Epoch) :-
   Epoch >= 0,
