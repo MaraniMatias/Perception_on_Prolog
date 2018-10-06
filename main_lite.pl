@@ -15,14 +15,14 @@ openDataSet :-
 % consult('./database/and.pl'),
 % consult('./database/or.pl'),
 % consult('./database/par.pl'),
-  consult('./database/impar.pl'),
-% consult('./database/mayor_5.pl'),
+% consult('./database/impar.pl'),
+  consult('./database/mayor_5.pl'),
 % consult('./database/xor.pl'),
   aggregate_all(count, data(_,_), Count),
   asserta(data_length(Count)).
 
 data_length(0).
-learning_rate(0.5).
+learning_rate(0.1).
 weight(synaptic, []).
 weight(bias, 1).
 error(0).
@@ -49,11 +49,12 @@ save_to_file(Fact) :-
 
 % Re-set weight values
 clenaer() :-
-  retractall(data(_,_)),
+  retractall(data(_, _)),
   retract(totalEpoch(_)),
   save_weight(synaptic, []),
   save_weight(bias, 1),
-  save_err(0).
+  save_err(0),
+  save_loss(inf).
 
 % Random List
 random_list(0, []).
@@ -179,10 +180,10 @@ epoch(Epoch) :-
   multi_ele_to_list(X, Elist, XElist),
   adjust_weights(XElist),
 
-  % Logic AND need this code
-  % weight(bias, B),
-  % NewB is B + Err,
-  % save_weight(bias, NewB),
+  % improve training
+  weight(bias, B),
+  NewB is B + Err,
+  save_weight(bias, NewB),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),
