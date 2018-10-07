@@ -86,16 +86,20 @@ pow(X, Y, Z) :-
 
 % activation function
 % https://en.wikipedia.org/wiki/Activation_function
+
 % Step
 step(X, 1) :-
   X > 0.
 step(_, 0). % 0 or -1
 
-% sigmiod
+% Relu
+relu(X, X) :-
+  X > 0.
+relu(_, 0).
+
+% Sigmiod
 sigmoid(X, Y) :-
-  Y2 is pow(e, -X),
-  Y1 is 1 + Y2,
-  Y is 1 rdiv Y1.
+  Y is 1 rdiv (1 + e**(-X)).
 
 perceptron(_, [], _) :-
   fail.
@@ -115,6 +119,8 @@ perceptron(Name, X, Rta) :-
   weight(Name, B, bias),
   MB is Mrta + B,
   step(MB, Rta).
+  % relu(MB, Rta).
+  % sigmoid(MB, Rta).
 
 % adjust
 adjust_weights(Name, XElist) :-

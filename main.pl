@@ -3,7 +3,7 @@
 :- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
-learning_rate(0.9).
+learning_rate(0.1).
 
 data_length(0).
 % data([], label).

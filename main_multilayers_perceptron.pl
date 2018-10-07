@@ -3,7 +3,7 @@
 :- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
-learning_rate(0.95).
+learning_rate(0.1).
 
 data_length(0).
 % data([], label).
@@ -61,7 +61,7 @@ epoch(Epoch) :-
 
   % perceptron(p1_ouput, [P1_C2, P2_C2, P3_C2], P_Output),
   perceptron(p1_ouput, [P1_C1, P2_C1], P_Output),
-  % format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Label]),
+  format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Label]),
   Err is Label - P_Output,
 
   adjust_net_weights([p1_c1, p2_c1], X, Err),
