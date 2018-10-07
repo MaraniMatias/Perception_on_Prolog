@@ -4,7 +4,7 @@ Simple implementación de un un perceptron con  Prolog
 ## Perceptron, ![info](https://en.wikipedia.org/wiki/Perceptron)
 
 ![Perceptron Image](https://raw.githubusercontent.com/MaraniMatias/Perceptron_on_Prolog/image/percepto.png)
-Fuente: [Nahua Kang](https://towardsdatascience.com/multi-layer-neural-networks-with-sigmoid-function-deep-learning-for-rookies-2-bf464f09eb7f)
+Autor de la imagen: [Nahua Kang](https://towardsdatascience.com/multi-layer-neural-networks-with-sigmoid-function-deep-learning-for-rookies-2-bf464f09eb7f)
 
 ## Problemas
 
