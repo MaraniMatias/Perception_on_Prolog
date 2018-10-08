@@ -158,7 +158,7 @@ calculate_gradient(_, _, [], []).
 calculate_gradient(Afun, Inputs, [Htarget|Ttarget], [H|T]) :-
   calculate_gradient(Afun, Ttarget, T),
   perceptron(Htarget, Afun, Inputs, Y)
-  foldl('d_' + Afun, Inputs, [Y], 0, H).
+  foldl(d_sigmoid, Inputs, [Y], 0, H).
 
 adjust_weights([], _).
 adjust_weights([Perceptron|PT], Delta) :-
@@ -198,8 +198,8 @@ backpropagation([Hidden|THidden], Outputs, Inputs, Targets, Outputs_err) :-
   matrix_multiply(HiddenGradients, Inputs, Weight_ih_deltas),
   % Adjust the weights by deltas
   adjust_weights(Hidden, Weight_ih_deltas),
-  adjust_bias(Hidden, HiddenGradients).
-  % backpropagation(THidden, Hidden, Inputs, Targets, Outputs_err).
+  adjust_bias(Hidden, HiddenGradients),
+  backpropagation(THidden, Hidden, Inputs, Targets, Outputs_err).
 
 
 
