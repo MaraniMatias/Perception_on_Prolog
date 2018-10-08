@@ -1,4 +1,6 @@
 % TODO:https://github.com/CodingTrain/Toy-Neural-Network-JS/blob/master/lib/nn.js
+% https://www.youtube.com/watch?v=tIeHLnjs5U8
+% https://www.youtube.com/watch?v=tlqinMNM4xs&list=PLRqwX-V7Uu6Y7MdSCaIfsxc561QI0U0Tb&index=18
 :- dynamic totalEpoch/1. % For epoch info
 :- dynamic weight/3.
 :- dynamic error/1.
@@ -138,9 +140,9 @@ matrix_multiply([H1|T1], [H2|T2], [H|Rta]) :-
   matrix_multiply(T1, T2, Rta).
 
 % Add a value to the items in the list
-add_value_to_items_list([], _, []).
-add_value_to_items_list([H1|T1], Val, [H|T]) :-
-  add_value_to_items_list(T1, Val, T),
+matrix_multiply([], _, []).
+matrix_multiply([H1|T1], Val, [H|T]) :-
+  matrix_multiply(T1, Val, T),
   H is H1 + Val.
 
 make_list_of_ele(0, _, []).
@@ -152,35 +154,52 @@ make_list_of_ele(C, Err, Rta) :-
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
 
-calculate_gradient(_, [], []).
-calculate_gradient(Dfun, [Htarget|Ttarget], [H|T]) :-
-  calculate_gradient(Dfun, Ttarget, T),
-  foldl(Dfun, [Htarget], 0, H).
+calculate_gradient(_, _, [], []).
+calculate_gradient(Afun, Inputs, [Htarget|Ttarget], [H|T]) :-
+  calculate_gradient(Afun, Ttarget, T),
+  perceptron(Htarget, Afun, Inputs, Y)
+  foldl('d_' + Afun, Inputs, [Y], 0, H).
 
 adjust_weights([], _).
 adjust_weights([Perceptron|PT], Delta) :-
   weight(Perceptron, W, synaptic),
-  sum_ele_by_ele_in_list(W, Delta, NewW)
+  sum_ele_by_ele_in_list(W, Delta, NewW),
   save_weight(Perceptron, NewW, synaptic),
-  % FIXME
-  % weight(Perceptron, bias, B),
-  % learning_rate(LR),
-  % NewB is B + LR * Err,
-  % save_weight(bias, NewB),
   adjust_weights(PT, Delta).
 
+adjust_bias([], _).
+adjust_bias([Perceptron|T], [Gradients|TG]) :-
+  weight(Perceptron, B, bias),
+  NewB is B + Gradients,
+  save_weight(NewB, bias),
+  adjust_bias(T, TG).
+
 %  Hidden layers and Ouputs layers
-backpropagation([Hidden|Outputs], Inputs, Targets, Outputs_err) :-
-  % Generating the Hidden Outputs
-  calculate_gradients(d_sigmoid, Targets, Gradients1),
+backpropagation([], _, _, _, _).
+backpropagation([Hidden|THidden], Outputs, Inputs, Targets, Outputs_err) :-
   learning_rate(LR),
-  % Make list Elist is [Err*LR,Err*LR,...]
-  add_value_to_items_list(Gradients1, LR, Gradients2),
-  % Make list XElist is [X1*Err,X2*Err,...]
+  % Generating the Hidden Outputs
+  calculate_gradient(sigmoid, Inputs, Targets, Gradients1),
+  matrix_multiply(Gradients1, LR, Gradients2),
   matrix_multiply(Gradients2, Outputs_err, Gradients),
   % Calculate deltas
   matrix_multiply(Gradients, Hidden, Weight_ho_deltas),
-  %  Adjust the weights by deltas
-  adjust_weights(Hidden, Weight_ho_deltas),
+  % Adjust the weights by deltas
+  adjust_weights(Outputs, Weight_ho_deltas),
+  adjust_bias(Outputs, Gradients),
+
+  % Calculate the hidden layer errors
+  matrix_multiply(Hidden, Outputs_err, HiddenErrors),
+  % Calculate hidden gradient
+  calculate_gradient(sigmoid, Inputs, Hidden, HiddenGradients1),
+  matrix_multiply(HiddenGradients1, LR, HiddenGradients2),
+  matrix_multiply(HiddenGradients2, HiddenErrors, HiddenGradients),
+  % Calcuate input -> hidden deltas
+  matrix_multiply(HiddenGradients, Inputs, Weight_ih_deltas),
+  % Adjust the weights by deltas
+  adjust_weights(Hidden, Weight_ih_deltas),
+  adjust_bias(Hidden, HiddenGradients).
+  % backpropagation(THidden, Hidden, Inputs, Targets, Outputs_err).
+
 
 

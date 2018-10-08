@@ -57,13 +57,11 @@ epoch(Epoch) :-
   perceptron(p2_c1, sigmoid, X, P2_C1),
   perceptron(p1_ouput, sigmoid, [P1_C1, P2_C1], P_Output),
 
-  format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Target]),
+  Predic is P_Output + 0.0,
+  format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
   Err is Target - P_Output,
 
-  backpropagation([
-    [p1_c1, p2_c1],
-    [p1_ouput]
-  ], X, [Target], [Err]),
+  backpropagation([[p1_c1, p2_c1]], [p1_ouput], X, [Target], [Err]),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),
