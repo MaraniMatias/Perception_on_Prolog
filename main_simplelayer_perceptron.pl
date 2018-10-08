@@ -119,18 +119,17 @@ perceptron(X, Rta) :-
 adjust_weights(X, Err) :-
   weight(synaptic, W),
   length_list(W, LenW),
-
   % Make list Elist is [Err*LR,Err*LR,...]
   make_list_of_ele(LenW, Err, Elist),
   % Make list XElist is [X1*Err,X2*Err,...]
   multi_ele_to_list(X, Elist, XElist),
   add_ele_by_ele_in_list(W, XElist, NewW),
-  /*
-  % Make list Elist is [Err*LR,Err*LR,...]
-  make_list_of_ele(LenW, Err, Elist),
-  add_ele_by_ele_in_list(W, Elist, NewW),
-  */
-  save_weight(synaptic, NewW).
+  save_weight(synaptic, NewW),
+
+  weight(bias, B),
+  learning_rate(LR),
+  NewB is B + LR * Err,
+  save_weight(bias, NewB).
 
 % Add the elements of the lists that are in
 % the same position and create another list
@@ -190,11 +189,6 @@ epoch(Epoch) :-
   Err is Label - P1,
 
   adjust_weights(X, Err),
-
-  % improve training
-  weight(bias, B),
-  NewB is B + Err,
-  save_weight(bias, NewB),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),

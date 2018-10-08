@@ -1,3 +1,4 @@
+% TODO:https://github.com/CodingTrain/Toy-Neural-Network-JS/blob/master/lib/nn.js
 :- dynamic totalEpoch/1. % For epoch info
 :- dynamic weight/3.
 :- dynamic error/1.
@@ -100,6 +101,8 @@ relu(_, _, 0).
 % Sigmiod
 sigmoid(X, _, Y) :-
   Y is 1 rdiv (1 + e**(-X)).
+d_sigmoid(Y, _, Rta) :-
+  Rta is Y * (1 - Y).
 
 perceptron(_, _, [], _) :-
   fail.
@@ -120,13 +123,6 @@ perceptron(Name, Afun, X, Rta) :-
   MB is Mrta + B,
   foldl(Afun, [MB], 0, Rta).
 
-% adjust
-adjust_weights(Name, XElist) :-
-  weight(Name, W, synaptic),
-  sum_ele_by_ele_in_list(W, XElist, NewW),
-  % writeln(W),  writeln(NewW),
-  save_weight(Name, NewW, synaptic).
-
 % Add the elements of the lists that are in
 % the same position and create another list
 sum_ele_by_ele_in_list([], [], []).
@@ -136,16 +132,16 @@ sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
 
 % Multiply the elements of the lists that are
 % in the same position and create another list
-multi_ele_to_list([], [], []).
-multi_ele_to_list([H1|T1], [H2|T2], [H|Rta]) :-
+matrix_multiply([], [], []).
+matrix_multiply([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 * H2,
-  multi_ele_to_list(T1, T2, Rta).
+  matrix_multiply(T1, T2, Rta).
 
 % Add a value to the items in the list
-% add_value_to_items_list([], _, []).
-% add_value_to_items_list([Hw|Tw], Err, [H|T]) :-
-%   add_value_to_items_list(Tw, Err, T),
-%   H is Hw + Err.
+add_value_to_items_list([], _, []).
+add_value_to_items_list([H1|T1], Val, [H|T]) :-
+  add_value_to_items_list(T1, Val, T),
+  H is H1 + Val.
 
 make_list_of_ele(0, _, []).
 make_list_of_ele(C, Err, Rta) :-
@@ -156,16 +152,35 @@ make_list_of_ele(C, Err, Rta) :-
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
 
-% Ajusta pesos de una lista de perceptron
-adjust_net_weights([], _, _).
-adjust_net_weights([Perceptron|T], X, Err) :-
-  length_list(X, LenX),
+calculate_gradient(_, [], []).
+calculate_gradient(Dfun, [Htarget|Ttarget], [H|T]) :-
+  calculate_gradient(Dfun, Ttarget, T),
+  foldl(Dfun, [Htarget], 0, H).
+
+adjust_weights([], _).
+adjust_weights([Perceptron|PT], Delta) :-
+  weight(Perceptron, W, synaptic),
+  sum_ele_by_ele_in_list(W, Delta, NewW)
+  save_weight(Perceptron, NewW, synaptic),
+  % FIXME
+  % weight(Perceptron, bias, B),
+  % learning_rate(LR),
+  % NewB is B + LR * Err,
+  % save_weight(bias, NewB),
+  adjust_weights(PT, Delta).
+
+%  Hidden layers and Ouputs layers
+backpropagation([Hidden|Outputs], Inputs, Targets, Outputs_err) :-
+  % Generating the Hidden Outputs
+  calculate_gradients(d_sigmoid, Targets, Gradients1),
+  learning_rate(LR),
   % Make list Elist is [Err*LR,Err*LR,...]
-  make_list_of_ele(LenX, Err, Elist),
+  add_value_to_items_list(Gradients1, LR, Gradients2),
   % Make list XElist is [X1*Err,X2*Err,...]
-  multi_ele_to_list(X, Elist, XElist),
-  adjust_weights(Perceptron, XElist),
-  weight(Perceptron, B, bias),
-  NewB is B + Err,
-  save_weight(Perceptron, NewB, bias),
-  adjust_net_weights(T, X, Err).
+  matrix_multiply(Gradients2, Outputs_err, Gradients),
+  % Calculate deltas
+  matrix_multiply(Gradients, Hidden, Weight_ho_deltas),
+  %  Adjust the weights by deltas
+  adjust_weights(Hidden, Weight_ho_deltas),
+
+

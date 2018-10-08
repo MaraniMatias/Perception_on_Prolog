@@ -51,19 +51,19 @@ epoch(-1) :-
 epoch(Epoch) :-
   Epoch >= 0,
 
-  data(X, Label),
-  retract(data(X, Label)),
-  perceptron(p1_c1, step, X, P1_C1),
-  perceptron(p2_c1, step, X, P2_C1),
-  perceptron(p1_ouput, step, [P1_C1, P2_C1], P_Output),
+  data(X, Target),
+  retract(data(X, Target)),
+  perceptron(p1_c1, sigmoid, X, P1_C1),
+  perceptron(p2_c1, sigmoid, X, P2_C1),
+  perceptron(p1_ouput, sigmoid, [P1_C1, P2_C1], P_Output),
 
-  format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Label]),
-  Err is Label - P_Output,
+  format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Target]),
+  Err is Target - P_Output,
 
-  Err1 is 0.7 * Err,
-  adjust_net_weights([p1_c1, p2_c1], X, Err1),
-  % Err2 is 0.5 * Err,
-  % adjust_net_weights([p1_ouput], [P1_C1, P2_C1], Err2),
+  backpropagation([
+    [p1_c1, p2_c1],
+    [p1_ouput]
+  ], X, [Target], [Err]),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),
