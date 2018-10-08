@@ -1,3 +1,8 @@
+/*
+% Activation Function
+  step, relu, sigmoid
+
+*/
 % Make a log file
 :- protocola('log_main_multilayers_perceptron.log').
 :- dynamic data_length/1 .
@@ -39,8 +44,7 @@ info(Epoch) :-
 epoch(-1) :-
   save_to_file(weight),
   clenaer([
-    p1_c1, p2_c1, p3_c1, p4_c1, p5_c1,
-    p1_c2, p2_c2, p3_c2,
+    p1_c1, p2_c1,
     p1_ouput
   ]).
 % loop by data
@@ -49,28 +53,17 @@ epoch(Epoch) :-
 
   data(X, Label),
   retract(data(X, Label)),
-  perceptron(p1_c1, X, P1_C1),
-  perceptron(p2_c1, X, P2_C1),
-  % perceptron(p3_c1, X, P3_C1),
-  % perceptron(p4_c1, X, P4_C1),
-  % perceptron(p5_c1, X, P5_C1),
+  perceptron(p1_c1, step, X, P1_C1),
+  perceptron(p2_c1, step, X, P2_C1),
+  perceptron(p1_ouput, step, [P1_C1, P2_C1], P_Output),
 
-  % perceptron(p1_c2, [P1_C1, P2_C1, P3_C1, P4_C1, P5_C1], P1_C2),
-  % perceptron(p2_c2, [P1_C1, P2_C1, P3_C1, P4_C1, P5_C1], P2_C2),
-  % perceptron(p3_c2, [P1_C1, P2_C1, P3_C1, P4_C1, P5_C1], P3_C2),
-
-  % perceptron(p1_ouput, [P1_C2, P2_C2, P3_C2], P_Output),
-  perceptron(p1_ouput, [P1_C1, P2_C1], P_Output),
   format('~t[INFO] predic: ~w - real: ~w~n', [P_Output, Label]),
   Err is Label - P_Output,
 
-  adjust_net_weights([p1_c1, p2_c1], X, Err),
-  % Err1 is 0.7 * Err,
-  % adjust_net_weights([p1_c1, p2_c1, p3_c1, p4_c1, p5_c1], X, Err1),
+  Err1 is 0.7 * Err,
+  adjust_net_weights([p1_c1, p2_c1], X, Err1),
   % Err2 is 0.5 * Err,
-  % adjust_net_weights([p1_c2, p2_c2, p3_c2], [P1_C1, P2_C1, P3_C1, P4_C1, P5_C1], Err2),
-  % Err3 is 0.1 * Err,
-  % adjust_net_weights([p1_ouput], [P1_C2, P2_C2, P3_C2], Err3),
+  % adjust_net_weights([p1_ouput], [P1_C1, P2_C1], Err2),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),

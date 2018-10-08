@@ -88,39 +88,37 @@ pow(X, Y, Z) :-
 % https://en.wikipedia.org/wiki/Activation_function
 
 % Step
-step(X, 1) :-
+step(X, _, 1) :-
   X > 0.
-step(_, 0). % 0 or -1
+step(_, _, 0). % 0 or -1
 
 % Relu
-relu(X, X) :-
+relu(X, _, X) :-
   X > 0.
-relu(_, 0).
+relu(_, _, 0).
 
 % Sigmiod
-sigmoid(X, Y) :-
+sigmoid(X, _, Y) :-
   Y is 1 rdiv (1 + e**(-X)).
 
-perceptron(_, [], _) :-
+perceptron(_, _, [], _) :-
   fail.
 % perceptron init weight
-perceptron(Name, X, Rta) :-
+perceptron(Name, Afun, X, Rta) :-
   weight(Name, [], synaptic),
   length_list(X, LenX),
   random_list(LenX, W),
   save_weight(Name, W, synaptic),
   random(B),
   save_weight(Name, B, bias),
-  perceptron(Name, X, Rta).
+  perceptron(Name, Afun, X, Rta).
 % perception
-perceptron(Name, X, Rta) :-
+perceptron(Name, Afun, X, Rta) :-
   weight(Name, W, synaptic),
   produc_dot(X, W, Mrta),
   weight(Name, B, bias),
   MB is Mrta + B,
-  step(MB, Rta).
-  % relu(MB, Rta).
-  % sigmoid(MB, Rta).
+  foldl(Afun, [MB], 0, Rta).
 
 % adjust
 adjust_weights(Name, XElist) :-
