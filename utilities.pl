@@ -90,6 +90,9 @@ pow(X, Y, Z) :-
 % activation function
 % https://en.wikipedia.org/wiki/Activation_function
 
+activation_function(sigmoid, d_sigmoid).
+activation_function(rule, d_rule).
+
 % Relu
 relu(X, X) :-
   X > 0.
@@ -104,24 +107,23 @@ sigmoid(X, Y) :-
 d_sigmoid(Y, Rta) :-
   Rta is Y * (1 - Y).
 
-perceptron(_, [], _) :-
+perceptron(_, _, [], _) :-
   fail.
 % perceptron init weight
-perceptron(Name, X, Rta) :-
+perceptron(Name, Afun ,X, Rta) :-
   weight(Name, [], synaptic),
   length_list(X, LenX),
   random_list(LenX, W),
   save_weight(Name, W, synaptic),
   random(B),
   save_weight(Name, B, bias),
-  perceptron(Name, X, Rta).
+  perceptron(Name, Afun, X, Rta).
 % perception
-perceptron(Name, X, Rta) :-
+perceptron(Name, Afun, X, Rta) :-
   weight(Name, W, synaptic),
   produc_dot(X, W, Mrta),
   weight(Name, B, bias),
   MB is Mrta + B,
-  activation_function(Afun, _),
   call(Afun, MB, Rta).
 
 % Add the elements of the lists that are in
@@ -147,9 +149,9 @@ matrix_multiply([H1|T1], Val, [H|T]) :-
 %                  Layers
 calculate_gradient(_, [], []).
 calculate_gradient([Houtputs|Toutputs], [Htarget|Ttarget], [H|T]) :-
-  activation_function(_, Dfun),
+  activation_function(sigmoid, Dfun),
   calculate_gradient(Toutputs, Ttarget, T),
-  perceptron(Houtputs, Htarget, Y),
+  perceptron(Houtputs, sigmoid, Htarget, Y),
   call(Dfun, Y, H).
 
 adjust_weights([], _).
@@ -193,3 +195,12 @@ backpropagation(HiddenLayer, OutputLayer, Inputs, Targets, Err) :-
   % Adjust the weights by deltas
   adjust_weights(HiddenLayer, Weight_ih_deltas),
   adjust_bias(HiddenLayer, HiddenGradients).
+
+train(Net, Inputs, Targets) :-
+  Predic is P_Output + 0.0,
+  format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
+  Err is Target - P_Output,
+
+  backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
+
+  calc_loss(Err), % Loss or MSE

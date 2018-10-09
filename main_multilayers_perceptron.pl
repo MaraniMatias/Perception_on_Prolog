@@ -4,9 +4,6 @@
 :- ['./utilities.pl'].
 
 learning_rate(0.1).
-activation_function(sigmoid, d_sigmoid).
-% activation_function(step, d_step).
-% activation_function(rule, d_rule).
 
 data_length(0).
 % data([], label).
@@ -24,9 +21,6 @@ openDataSet :-
 
 % info only if epoch change
 info(_) :-
-  % weight(p1, W1, synaptic), writeln(['W1', W1]),
-  % weight(p1, B1, bias), writeln(['B1', B1]),
-  % error(e1, Error), writeln(['Err', Error]),
   data(_, _).
 info(Epoch) :-
   totalEpoch(TotalEpoch),
@@ -42,7 +36,7 @@ info(Epoch) :-
 epoch(-1) :-
   save_to_file(weight),
   clenaer([
-    p1_c1, p2_c1,
+    p1_inputs, p2_inputs,
     p1_output
   ]).
 % loop by data
@@ -51,17 +45,17 @@ epoch(Epoch) :-
 
   data(X, Target),
   retract(data(X, Target)),
-  perceptron(p1_c1, X, P1_C1),
-  perceptron(p2_c1, X, P2_C1),
-  perceptron(p1_output, [P1_C1, P2_C1], P_Output),
 
-  Predic is P_Output + 0.0,
-  format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
-  Err is Target - P_Output,
+  train([
+    [
+      perceptron(p1_inputs, sigmoid, X, P1_C1),
+      perceptron(p2_inputs, sigmoid, X, P2_C1)
+    ],
+    [
+      perceptron(p1_output, sigmoid, [P1_C1, P2_C1], P_Output)
+    ],
+  ], X, Target),
 
-  backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
-
-  calc_loss(Err), % Loss or MSE
   info(Epoch),
   epoch(Epoch).
 % if loos is 0 or less, stop loop
