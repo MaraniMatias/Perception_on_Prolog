@@ -1,3 +1,4 @@
+% NOTE: train(DeepNet, X, [Target]),
 % Make a log file
 :- protocola('log_main_multilayers_perceptron.log').
 :- ['./utilities.pl'].
@@ -33,7 +34,7 @@ epoch(Epoch) :-
   data(X, Target),
   retract(data(X, Target)),
   deep_net(DeepNet),
-  train(DeepNet, X, Target),
+  train(DeepNet, X, [Target]),
   info(Epoch),
   epoch(Epoch).
 % if loos is 0 or less, stop loop

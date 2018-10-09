@@ -229,10 +229,10 @@ predic([Hlayers|Tlayers], Inputs, Predic) :-
   predic(Tlayers, LayersOutputs, Predic).
 % predic_layer(Layers, Inputs, LayersOutputs) :-
 predic_layer([], _, []).
-predic_layer([Perceptron|T], Inputs, [Output|T]) :-
+predic_layer([Perceptron|Tp], Inputs, [Output|T]) :-
   perceptron(P, Afun)  = Perceptron,
-  perceptron(P, Afun, Inputs, Output),
-  predic_layer(T, Inputs, T).
+  predic_layer(Tp, Inputs, T),
+  perceptron(P, Afun, Inputs, Output).
 % predic_err(NetOutput, Targets, Err) :-
 predic_err([], [], _).
 predic_err([Ho|To], [Ht|Tt], SumErr) :-
