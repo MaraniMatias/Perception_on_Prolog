@@ -156,7 +156,7 @@ make_list_of_ele(C, Err, Rta) :-
   make_list_of_ele(C1, Err, T).
 
 calculate_gradient(_, [], []).
-calculate_gradient([Houtputs|Toutputs], [Htargetr|,Ttarget], [H|T]) :-
+calculate_gradient([Houtputs|Toutputs], [Htarget|Ttarget], [H|T]) :-
   activation_function(_, Dfun),
   calculate_gradient(Toutputs, Ttarget, T),
   perceptron(Houtputs, Htarget, Y),
