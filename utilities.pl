@@ -70,10 +70,15 @@ clenaer([]) :-
   retract(totalEpoch(_)),
   save_err(0),
   save_loss(inf).
-clenaer([P|T]) :-
+clenaer([Hlayers|Tlayers]) :-
+  clenaer_weights(Hlayers),
+  clenaer(Tlayers).
+clenaer_weights([]).
+clenaer_weights([Perceptron|T]) :-
+  perceptron(P, _, _, _) = Perceptron,
   save_weight(P, [], synaptic),
   save_weight(P, 0, bias),
-  clenaer(T).
+  clenaer_weights(T).
 
 % Random List
 random_list(0, []).

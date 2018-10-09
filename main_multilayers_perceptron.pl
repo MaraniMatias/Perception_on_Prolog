@@ -28,7 +28,6 @@ epoch(-1) :-
 % loop by data
 epoch(Epoch) :-
   Epoch >= 0,
-
   data(X, Target),
   retract(data(X, Target)),
 
