@@ -1,8 +1,8 @@
 % TODO:https://github.com/CodingTrain/Toy-Neural-Network-JS/blob/master/lib/nn.js
 % https://www.youtube.com/watch?v=tIeHLnjs5U8
 % https://www.youtube.com/watch?v=tlqinMNM4xs&list=PLRqwX-V7Uu6Y7MdSCaIfsxc561QI0U0Tb&index=18
-:- dynamic totalEpoch/1. % For epoch info
-:- dynamic data_length/1 .
+:- dynamic totalEpoch/1.
+:- dynamic data_length/1.
 :- dynamic weight/3.
 :- dynamic error/1.
 :- dynamic data/2.
@@ -234,18 +234,18 @@ predic_layer([Perceptron|Tp], Inputs, [Output|T]) :-
   predic_layer(Tp, Inputs, T),
   perceptron(P, Afun, Inputs, Output).
 % predic_err(NetOutput, Targets, Err) :-
-predic_err([], [], _).
+predic_err([], [], 0).
 predic_err([Ho|To], [Ht|Tt], SumErr) :-
   predic_info(Ho, Ht),
   predic_err(To, Tt, Err),
   SumErr is (Ht - Ho) + Err.
-predic_info(_, _).
 predic_info(Output, Target) :-
   predic_info(on),
   % Output -> 11 rdiv 2
   Predic is Output + 0.0,
   % Predic -> 5.5
   format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]).
+predic_info(_, _).
 % Predictions -----------------------------------------------------------------
 
 % train(DeepNet, Inputs, Targets) :-
