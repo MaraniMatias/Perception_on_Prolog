@@ -233,14 +233,25 @@ predic_layer([Perceptron|T], Inputs, [Output|T]) :-
   perceptron(P, Afun)  = Perceptron,
   perceptron(P, Afun, Inputs, Output),
   predic_layer(T, Inputs, T).
+% predic_err(NetOutput, Targets, Err) :-
+predic_err([], [], _).
+predic_err([Ho|To], [Ht|Tt], SumErr) :-
+  predic_info(Ho, Ht),
+  predic_err(To, Tt, Err),
+  SumErr is (Ht - Ho) + Err.
+predic_info(_, _).
+predic_info(Output, Target) :-
+  predic_info(on),
+  % Output -> 11 rdiv 2
+  Predic is Output + 0.0,
+  % Predic -> 5.5
+  format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]).
 % Predictions -----------------------------------------------------------------
 
 % train(DeepNet, Inputs, Targets) :-
 train(DeepNet, Inputs, Targets) :-
-  predic(DeepNet, Inputs, Predic),
-  Predic is Net_Output + 0.0, % Prolog 546 rdiv 45456
-  format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
-  Err is Target - Net_Output,
+  predic(DeepNet, Inputs, NetOutput),
+  predic_err(NetOutput, Targets, Err),
 
   % backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
 

@@ -1,6 +1,8 @@
 % Make a log file
 :- protocola('log_main_multilayers_perceptron.log').
 :- ['./utilities.pl'].
+% Program setting
+predic_info(on). % on/off
 
 % dataSet('./database/and.pl').
 % dataSet('./database/or.pl').
