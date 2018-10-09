@@ -64,20 +64,20 @@ info(Epoch) :-
   info(Epoch).
 
 % Re-set weight values
-clenaer([]) :-
+cleaner([]) :-
   retractall(data(_, _)),
   retract(totalEpoch(_)),
   save_err(0),
   save_loss(inf).
-clenaer([Hlayers|Tlayers]) :-
-  clenaer_weights(Hlayers),
-  clenaer(Tlayers).
-clenaer_weights([]).
-clenaer_weights([Perceptron|T]) :-
+cleaner([Hlayers|Tlayers]) :-
+  cleaner_weights(Hlayers),
+  cleaner(Tlayers).
+cleaner_weights([]).
+cleaner_weights([Perceptron|T]) :-
   perceptron(P, _) = Perceptron,
   save_weight(P, [], synaptic),
   save_weight(P, 0, bias),
-  clenaer_weights(T).
+  cleaner_weights(T).
 
 % Calculate the mean square error
 calc_loss(Err) :-

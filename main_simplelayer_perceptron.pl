@@ -56,7 +56,7 @@ save_to_file(Fact) :-
   told.
 
 % Re-set weight values
-clenaer() :-
+cleaner() :-
   retractall(data(_, _)),
   retract(totalEpoch(_)),
   save_weight(synaptic, []),
@@ -190,7 +190,7 @@ info(Epoch) :-
 % epoch
 epoch(-1) :-
   save_to_file(weight),
-  clenaer().
+  cleaner().
 % loop by data
 epoch(Epoch) :-
   Epoch >= 0,

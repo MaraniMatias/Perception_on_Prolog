@@ -27,7 +27,7 @@ deep_net([
 epoch(-1) :-
   save_to_file(weight),
   deep_net(DeepNet),
-  clenaer(DeepNet).
+  cleaner(DeepNet).
 % loop by data
 epoch(Epoch) :-
   Epoch >= 0,
