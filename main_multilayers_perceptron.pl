@@ -12,11 +12,11 @@
 learning_rate(0.1).
 deep_net([
   [
-    perceptron(p1_inputs, sigmoid, X, P1_C1),
-    perceptron(p2_inputs, sigmoid, X, P2_C1)
+    perceptron(p1_inputs, sigmoid),
+    perceptron(p2_inputs, sigmoid)
   ],
   [
-    perceptron(p1_output, sigmoid, [P1_C1, P2_C1], P_Output)
+    perceptron(p1_output, sigmoid)
   ]
 ]).
 
@@ -30,10 +30,8 @@ epoch(Epoch) :-
   Epoch >= 0,
   data(X, Target),
   retract(data(X, Target)),
-
   deep_net(DeepNet),
   train(DeepNet, X, Target),
-
   info(Epoch),
   epoch(Epoch).
 % if loos is 0 or less, stop loop

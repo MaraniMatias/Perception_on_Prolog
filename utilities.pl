@@ -9,9 +9,8 @@
 :- dynamic loss/1.
 loss(inf).
 error(0).
-% totalEpoch(0).
-
 data_length(0).
+
 % data([], label).
 openDataSet :-
   retractall(data(_, _)),
@@ -75,10 +74,60 @@ clenaer([Hlayers|Tlayers]) :-
   clenaer(Tlayers).
 clenaer_weights([]).
 clenaer_weights([Perceptron|T]) :-
-  perceptron(P, _, _, _) = Perceptron,
+  perceptron(P, _) = Perceptron,
   save_weight(P, [], synaptic),
   save_weight(P, 0, bias),
   clenaer_weights(T).
+
+% Calculate the mean square error
+calc_loss(Err) :-
+  error(SE),
+  SErr is SE + Err * Err,
+  save_err(SErr),
+  data_length(Count),
+  Loss is SErr rdiv Count,
+  save_loss(Loss).
+
+% activation function ---------------------------------------------------------
+% https://en.wikipedia.org/wiki/Activation_function
+activation_function(sigmoid, d_sigmoid).
+activation_function(rule, d_rule).
+
+% Relu
+relu(X, X) :-
+  X > 0.
+relu(_, 0).
+d_relu(Y, 1) :-
+  Y > 0.
+d_relu(_, 0).
+
+% Sigmiod
+sigmoid(X, Y) :-
+  Y is 1 rdiv (1 + e**(-X)).
+d_sigmoid(Y, Rta) :-
+  Rta is Y * (1 - Y).
+% activation function ---------------------------------------------------------
+
+% perceptron ------------------------------------------------------------------
+perceptron(_, _, [], _) :-
+  fail.
+% perceptron init weight
+perceptron(Name, Afun ,X, Rta) :-
+  weight(Name, [], synaptic),
+  length_list(X, LenX),
+  random_list(LenX, W),
+  save_weight(Name, W, synaptic),
+  random(B),
+  save_weight(Name, B, bias),
+  perceptron(Name, Afun, X, Rta).
+% perception
+perceptron(Name, Afun, X, Rta) :-
+  weight(Name, W, synaptic),
+  produc_dot(X, W, Mrta),
+  weight(Name, B, bias),
+  MB is Mrta + B,
+  call(Afun, MB, Rta).
+% perceptron ------------------------------------------------------------------
 
 % Random List
 random_list(0, []).
@@ -101,59 +150,6 @@ produc_dot([H1|T1], [H2|T2], Rta) :-
  produc_dot(T1, T2, Rta1),
  Rta is Rta1 + H1 * H2.
 
-% Calculate the mean square error
-calc_loss(Err) :-
-  error(SE),
-  SErr is SE + Err * Err,
-  save_err(SErr),
-  data_length(Count),
-  Loss is SErr rdiv Count,
-  save_loss(Loss).
-
-pow(_, 0, 1).
-pow(X, Y, Z) :-
-  Y1 is Y - 1,
-  pow(X, Y1, Z1),
-  Z is Z1 * X.
-
-% activation function
-% https://en.wikipedia.org/wiki/Activation_function
-
-activation_function(sigmoid, d_sigmoid).
-activation_function(rule, d_rule).
-
-% Relu
-relu(X, X) :-
-  X > 0.
-relu(_, 0).
-d_relu(Y, 1) :-
-  Y > 0.
-d_relu(_, 0).
-
-% Sigmiod
-sigmoid(X, Y) :-
-  Y is 1 rdiv (1 + e**(-X)).
-d_sigmoid(Y, Rta) :-
-  Rta is Y * (1 - Y).
-
-perceptron(_, _, [], _) :-
-  fail.
-% perceptron init weight
-perceptron(Name, Afun ,X, Rta) :-
-  weight(Name, [], synaptic),
-  length_list(X, LenX),
-  random_list(LenX, W),
-  save_weight(Name, W, synaptic),
-  random(B),
-  save_weight(Name, B, bias),
-  perceptron(Name, Afun, X, Rta).
-% perception
-perceptron(Name, Afun, X, Rta) :-
-  weight(Name, W, synaptic),
-  produc_dot(X, W, Mrta),
-  weight(Name, B, bias),
-  MB is Mrta + B,
-  call(Afun, MB, Rta).
 
 % Add the elements of the lists that are in
 % the same position and create another list
@@ -225,11 +221,28 @@ backpropagation(HiddenLayer, OutputLayer, Inputs, Targets, Err) :-
   adjust_weights(HiddenLayer, Weight_ih_deltas),
   adjust_bias(HiddenLayer, HiddenGradients).
 
-train(Net, Inputs, Targets) :-
-  Predic is P_Output + 0.0,
+% Predictions -----------------------------------------------------------------
+% predic(DeepNet, inputs, predic)
+predic([], Predic, Predic).
+predic([Hlayers|Tlayers], Inputs, Predic) :-
+  predic_layer(Hlayers, Inputs, LayersOutputs),
+  predic(Tlayers, LayersOutputs, Predic).
+% predic_layer(Layers, Inputs, LayersOutputs) :-
+predic_layer([], _, []).
+predic_layer([Perceptron|T], Inputs, [Output|T]) :-
+  perceptron(P, Afun)  = Perceptron,
+  perceptron(P, Afun, Inputs, Output),
+  predic_layer(T, Inputs, T).
+% Predictions -----------------------------------------------------------------
+
+% train(DeepNet, Inputs, Targets) :-
+train(DeepNet, Inputs, Targets) :-
+  predic(DeepNet, Inputs, Predic),
+  Predic is Net_Output + 0.0, % Prolog 546 rdiv 45456
   format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
-  Err is Target - P_Output,
+  Err is Target - Net_Output,
 
-  backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
+  % backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
 
-  calc_loss(Err), % Loss or MSE
+  % Loss or MSE
+  calc_loss(Err).
