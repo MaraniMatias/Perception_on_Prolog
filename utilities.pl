@@ -106,7 +106,7 @@ sigmoid(X, Y) :-
 d_sigmoid(Y, Rta) :-
   Rta is Y * (1 - Y).
 
-perceptron(_, _, [], _) :-
+perceptron(_, [], _) :-
   fail.
 % perceptron init weight
 perceptron(Name, X, Rta) :-
@@ -156,10 +156,10 @@ make_list_of_ele(C, Err, Rta) :-
   make_list_of_ele(C1, Err, T).
 
 calculate_gradient(_, [], []).
-calculate_gradient(Outputs, [Htarget|Ttarget], [H|T]) :-
+calculate_gradient([Houtputs|Toutputs], [Htargetr|,Ttarget], [H|T]) :-
   activation_function(_, Dfun),
-  calculate_gradient(Outputs, Ttarget, T),
-  perceptron(Outputs, Htarget, Y),
+  calculate_gradient(Toutputs, Ttarget, T),
+  perceptron(Houtputs, Htarget, Y),
   call(Dfun, Y, H).
 
 adjust_weights([], _).

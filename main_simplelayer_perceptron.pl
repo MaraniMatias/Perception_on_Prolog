@@ -1,5 +1,5 @@
 % Make a log file
-:- protocola('perceptron.log').
+:- protocola('log_main_simplelayer_perceptron.log').
 
 :- dynamic data_length/1.
 :- dynamic totalEpoch/1. % For epoch info
