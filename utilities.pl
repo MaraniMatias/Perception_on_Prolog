@@ -90,15 +90,13 @@ pow(X, Y, Z) :-
 % activation function
 % https://en.wikipedia.org/wiki/Activation_function
 
-% Step
-step(X, 1) :-
-  X > 0.
-step(_, 0). % 0 or -1
-
 % Relu
 relu(X, X) :-
   X > 0.
 relu(_, 0).
+d_relu(Y, 1) :-
+  Y > 0.
+d_relu(_, 0).
 
 % Sigmiod
 sigmoid(X, Y) :-
@@ -128,10 +126,10 @@ perceptron(Name, X, Rta) :-
 
 % Add the elements of the lists that are in
 % the same position and create another list
-sum_ele_by_ele_in_list([], [], []).
-sum_ele_by_ele_in_list([H1|T1], [H2|T2], [H|Rta]) :-
+matrix_add([], [], []).
+matrix_add([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 + H2,
-  sum_ele_by_ele_in_list(T1, T2, Rta).
+  matrix_add(T1, T2, Rta).
 
 % Multiply the elements of the lists that are
 % in the same position and create another list
@@ -140,21 +138,13 @@ matrix_multiply([H1|T1], [H2|T2], [H|Rta]) :-
   H is H1 * H2,
   matrix_multiply(T1, T2, Rta).
 
-% Add a value to the items in the list
+% Mutiply value to the items in the list
 matrix_multiply([], _, []).
 matrix_multiply([H1|T1], Val, [H|T]) :-
   matrix_multiply(T1, Val, T),
-  H is H1 + Val.
+  H is H1 * Val.
 
-make_list_of_ele(0, _, []).
-make_list_of_ele(C, Err, Rta) :-
-  C > 0,
-  C1 is C - 1,
-  learning_rate(LR),
-  H is Err * LR,
-  Rta = [H|T],
-  make_list_of_ele(C1, Err, T).
-
+%                  Layers
 calculate_gradient(_, [], []).
 calculate_gradient([Houtputs|Toutputs], [Htarget|Ttarget], [H|T]) :-
   activation_function(_, Dfun),
@@ -165,7 +155,7 @@ calculate_gradient([Houtputs|Toutputs], [Htarget|Ttarget], [H|T]) :-
 adjust_weights([], _).
 adjust_weights([Perceptron|PT], Delta) :-
   weight(Perceptron, W, synaptic),
-  sum_ele_by_ele_in_list(W, Delta, NewW),
+  matrix_add(W, Delta, NewW),
   save_weight(Perceptron, NewW, synaptic),
   adjust_weights(PT, Delta).
 

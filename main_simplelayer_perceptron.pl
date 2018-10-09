@@ -1,12 +1,16 @@
 % Make a log file
 :- protocola('log_main_simplelayer_perceptron.log').
-
 :- dynamic data_length/1.
 :- dynamic totalEpoch/1. % For epoch info
 :- dynamic weight/2.
 :- dynamic error/1.
 :- dynamic data/2.
 :- dynamic loss/1.
+
+learning_rate(0.5).
+activation_function(step).
+% ctivation_function(sigmoid).
+% activation_function(rule).
 
 % data([], label).
 openDataSet :-
@@ -27,7 +31,6 @@ openDataSet :-
   asserta(data_length(Count)).
 
 data_length(0).
-learning_rate(0.5).
 weight(synaptic, []).
 weight(bias, 1).
 error(0).
@@ -97,6 +100,15 @@ step(X, 1) :-
   X > 0.
 step(_, 0). % 0 or -1
 
+% Relu
+relu(X, X) :-
+  X > 0.
+relu(_, 0).
+
+% Sigmiod
+sigmoid(X, Y) :-
+  Y is 1 rdiv (1 + e**(-X)).
+
 perceptron([], _) :-
   fail.
 % perceptron init weight
@@ -112,7 +124,8 @@ perceptron(X, Rta) :-
   produc_dot(X, W, Mrta),
   weight(bias, B),
   MB is Mrta + B,
-  step(MB, Rta).
+  activation_function(Afun),
+  call(Afun, MB, Rta).
 
 % adjust
 % Elist is [Err*LR,Err*LR,...]
