@@ -2,6 +2,7 @@
 % https://www.youtube.com/watch?v=tIeHLnjs5U8
 % https://www.youtube.com/watch?v=tlqinMNM4xs&list=PLRqwX-V7Uu6Y7MdSCaIfsxc561QI0U0Tb&index=18
 :- dynamic totalEpoch/1. % For epoch info
+:- dynamic data_length/1 .
 :- dynamic weight/3.
 :- dynamic error/1.
 :- dynamic data/2.
@@ -9,6 +10,16 @@
 loss(inf).
 error(0).
 % totalEpoch(0).
+
+data_length(0).
+% data([], label).
+openDataSet :-
+  retractall(data(_, _)),
+  retract(data_length(_)),
+  dataSet(DataSet),
+  consult(DataSet),
+  aggregate_all(count, data(_, _), Count),
+  asserta(data_length(Count)).
 
 % Retract and Asserta
 save_err(Val) :-
@@ -39,6 +50,19 @@ save_to_file(Fact) :-
   tell('./weight.data'),
   listing(Fact),
   told.
+
+% info only if epoch change
+info(_) :-
+  data(_, _).
+info(Epoch) :-
+  totalEpoch(TotalEpoch),
+  loss(Loss),
+  Run is TotalEpoch - Epoch + 1,
+  format('[INFO] Epoch ~w - Loss: ~4f ~n', [Run, Loss]).
+% Run one times
+info(Epoch) :-
+  asserta(totalEpoch(Epoch)),
+  info(Epoch).
 
 % Re-set weight values
 clenaer([]) :-

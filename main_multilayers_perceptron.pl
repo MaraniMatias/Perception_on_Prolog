@@ -1,44 +1,30 @@
 % Make a log file
 :- protocola('log_main_multilayers_perceptron.log').
-:- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
+% dataSet('./database/and.pl').
+% dataSet('./database/or.pl').
+% dataSet('./database/par.pl').
+% dataSet('./database/impar.pl').
+% dataSet('./database/mayor_5.pl').
+  dataSet('./database/xor.pl').
+
 learning_rate(0.1).
-
-data_length(0).
-% data([], label).
-openDataSet :-
-  retractall(data(_, _)),
-  retract(data_length(_)),
-% consult('./database/and.pl'),
-% consult('./database/or.pl'),
-% consult('./database/par.pl'),
-% consult('./database/impar.pl'),
-% consult('./database/mayor_5.pl'),
-  consult('./database/xor.pl'),
-  aggregate_all(count, data(_, _), Count),
-  asserta(data_length(Count)).
-
-% info only if epoch change
-info(_) :-
-  data(_, _).
-info(Epoch) :-
-  totalEpoch(TotalEpoch),
-  loss(Loss),
-  Run is TotalEpoch - Epoch + 1,
-  format('[INFO] Epoch ~w - Loss: ~4f ~n', [Run, Loss]).
-% Run one times
-info(Epoch) :-
-  asserta(totalEpoch(Epoch)),
-  info(Epoch).
+deep_net([
+  [
+    perceptron(p1_inputs, sigmoid, X, P1_C1),
+    perceptron(p2_inputs, sigmoid, X, P2_C1)
+  ],
+  [
+    perceptron(p1_output, sigmoid, [P1_C1, P2_C1], P_Output)
+  ]
+]).
 
 % epoch
 epoch(-1) :-
   save_to_file(weight),
-  clenaer([
-    p1_inputs, p2_inputs,
-    p1_output
-  ]).
+  deep_net(DeepNet),
+  clenaer(DeepNet).
 % loop by data
 epoch(Epoch) :-
   Epoch >= 0,
@@ -46,15 +32,8 @@ epoch(Epoch) :-
   data(X, Target),
   retract(data(X, Target)),
 
-  train([
-    [
-      perceptron(p1_inputs, sigmoid, X, P1_C1),
-      perceptron(p2_inputs, sigmoid, X, P2_C1)
-    ],
-    [
-      perceptron(p1_output, sigmoid, [P1_C1, P2_C1], P_Output)
-    ],
-  ], X, Target),
+  deep_net(DeepNet),
+  train(DeepNet, X, Target),
 
   info(Epoch),
   epoch(Epoch).
