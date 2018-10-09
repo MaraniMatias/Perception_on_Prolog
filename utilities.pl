@@ -91,39 +91,40 @@ pow(X, Y, Z) :-
 % https://en.wikipedia.org/wiki/Activation_function
 
 % Step
-step(X, _, 1) :-
+step(X, 1) :-
   X > 0.
-step(_, _, 0). % 0 or -1
+step(_, 0). % 0 or -1
 
 % Relu
-relu(X, _, X) :-
+relu(X, X) :-
   X > 0.
-relu(_, _, 0).
+relu(_, 0).
 
 % Sigmiod
-sigmoid(X, _, Y) :-
+sigmoid(X, Y) :-
   Y is 1 rdiv (1 + e**(-X)).
-d_sigmoid(Y, _, Rta) :-
+d_sigmoid(Y, Rta) :-
   Rta is Y * (1 - Y).
 
 perceptron(_, _, [], _) :-
   fail.
 % perceptron init weight
-perceptron(Name, Afun, X, Rta) :-
+perceptron(Name, X, Rta) :-
   weight(Name, [], synaptic),
   length_list(X, LenX),
   random_list(LenX, W),
   save_weight(Name, W, synaptic),
   random(B),
   save_weight(Name, B, bias),
-  perceptron(Name, Afun, X, Rta).
+  perceptron(Name, X, Rta).
 % perception
-perceptron(Name, Afun, X, Rta) :-
+perceptron(Name, X, Rta) :-
   weight(Name, W, synaptic),
   produc_dot(X, W, Mrta),
   weight(Name, B, bias),
   MB is Mrta + B,
-  foldl(Afun, [MB], 0, Rta).
+  activation_function(Afun, _),
+  call(Afun, MB, Rta).
 
 % Add the elements of the lists that are in
 % the same position and create another list
@@ -154,11 +155,12 @@ make_list_of_ele(C, Err, Rta) :-
   Rta = [H|T],
   make_list_of_ele(C1, Err, T).
 
-calculate_gradient(_, _, [], []).
-calculate_gradient(Afun, Inputs, [Htarget|Ttarget], [H|T]) :-
-  calculate_gradient(Afun, Ttarget, T),
-  perceptron(Htarget, Afun, Inputs, Y)
-  foldl(d_sigmoid, Inputs, [Y], 0, H).
+calculate_gradient(_, [], []).
+calculate_gradient(Outputs, [Htarget|Ttarget], [H|T]) :-
+  activation_function(_, Dfun),
+  calculate_gradient(Outputs, Ttarget, T),
+  perceptron(Outputs, Htarget, Y),
+  call(Dfun, Y, H).
 
 adjust_weights([], _).
 adjust_weights([Perceptron|PT], Delta) :-
@@ -168,38 +170,36 @@ adjust_weights([Perceptron|PT], Delta) :-
   adjust_weights(PT, Delta).
 
 adjust_bias([], _).
-adjust_bias([Perceptron|T], [Gradients|TG]) :-
+adjust_bias([Perceptron|T], [Gradient|TG]) :-
   weight(Perceptron, B, bias),
-  NewB is B + Gradients,
+  NewB is B + Gradient,
   save_weight(NewB, bias),
   adjust_bias(T, TG).
 
-%  Hidden layers and Ouputs layers
+%  Hidden layers and Outputs layers
 backpropagation([], _, _, _, _).
-backpropagation([Hidden|THidden], Outputs, Inputs, Targets, Outputs_err) :-
+%               HiddenLayers      OutputsLayers     Inputs_data and Lable, Err
+backpropagation(HiddenLayer, OutputLayer, Inputs, Targets, Err) :-
   learning_rate(LR),
+
   % Generating the Hidden Outputs
-  calculate_gradient(sigmoid, Inputs, Targets, Gradients1),
+  calculate_gradient(OutputLayer, Targets, Gradients1),
   matrix_multiply(Gradients1, LR, Gradients2),
-  matrix_multiply(Gradients2, Outputs_err, Gradients),
+  matrix_multiply(Gradients2, Err, Gradients),
   % Calculate deltas
-  matrix_multiply(Gradients, Hidden, Weight_ho_deltas),
+  matrix_multiply(Gradients, HiddenLayer, Weight_ho_deltas),
   % Adjust the weights by deltas
-  adjust_weights(Outputs, Weight_ho_deltas),
-  adjust_bias(Outputs, Gradients),
+  adjust_weights(OutputLayer, Weight_ho_deltas),
+  adjust_bias(OutputLayer, Gradients),
 
   % Calculate the hidden layer errors
-  matrix_multiply(Hidden, Outputs_err, HiddenErrors),
+  matrix_multiply(HiddenLayer, Err, HiddenErrors),
   % Calculate hidden gradient
-  calculate_gradient(sigmoid, Inputs, Hidden, HiddenGradients1),
+  calculate_gradient(Inputs, HiddenLayer, HiddenGradients1),
   matrix_multiply(HiddenGradients1, LR, HiddenGradients2),
   matrix_multiply(HiddenGradients2, HiddenErrors, HiddenGradients),
   % Calcuate input -> hidden deltas
   matrix_multiply(HiddenGradients, Inputs, Weight_ih_deltas),
   % Adjust the weights by deltas
-  adjust_weights(Hidden, Weight_ih_deltas),
-  adjust_bias(Hidden, HiddenGradients),
-  backpropagation(THidden, Hidden, Inputs, Targets, Outputs_err).
-
-
-
+  adjust_weights(HiddenLayer, Weight_ih_deltas),
+  adjust_bias(HiddenLayer, HiddenGradients).

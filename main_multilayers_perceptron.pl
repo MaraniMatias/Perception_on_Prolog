@@ -1,14 +1,12 @@
-/*
-% Activation Function
-  step, relu, sigmoid
-
-*/
 % Make a log file
 :- protocola('log_main_multilayers_perceptron.log').
 :- dynamic data_length/1 .
 :- ['./utilities.pl'].
 
 learning_rate(0.1).
+activation_function(sigmoid, d_sigmoid).
+% activation_function(step, d_step).
+% activation_function(rule, d_rule).
 
 data_length(0).
 % data([], label).
@@ -45,7 +43,7 @@ epoch(-1) :-
   save_to_file(weight),
   clenaer([
     p1_c1, p2_c1,
-    p1_ouput
+    p1_output
   ]).
 % loop by data
 epoch(Epoch) :-
@@ -53,15 +51,15 @@ epoch(Epoch) :-
 
   data(X, Target),
   retract(data(X, Target)),
-  perceptron(p1_c1, sigmoid, X, P1_C1),
-  perceptron(p2_c1, sigmoid, X, P2_C1),
-  perceptron(p1_ouput, sigmoid, [P1_C1, P2_C1], P_Output),
+  perceptron(p1_c1, X, P1_C1),
+  perceptron(p2_c1, X, P2_C1),
+  perceptron(p1_output, [P1_C1, P2_C1], P_Output),
 
   Predic is P_Output + 0.0,
   format('~t[INFO] predic: ~w - real: ~w~n', [Predic, Target]),
   Err is Target - P_Output,
 
-  backpropagation([[p1_c1, p2_c1]], [p1_ouput], X, [Target], [Err]),
+  backpropagation([p1_c1, p2_c1], [p1_output], X, [Target], [Err]),
 
   calc_loss(Err), % Loss or MSE
   info(Epoch),
